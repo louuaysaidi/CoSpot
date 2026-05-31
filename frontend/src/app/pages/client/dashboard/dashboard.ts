@@ -101,7 +101,16 @@ export class Dashboard implements OnInit {
   }
 
   getDureeLabel(duree: string): string {
-    return duree === 'journee' ? 'Journée' : 'Demi-journée';
+    switch (duree) {
+      case 'journee': return 'Journee';
+      case 'demi_journee': return 'Demi-journee';
+      case 'salle_1h': return '1 heure';
+      case 'salle_2h': return '2 heures';
+      case 'bureau_1_semaine': return '1 semaine';
+      case 'bureau_2_semaines': return '2 semaines';
+      case 'bureau_1_mois': return '1 mois';
+      default: return duree;
+    }
   }
 
   getTypeIcon(type: string): string {

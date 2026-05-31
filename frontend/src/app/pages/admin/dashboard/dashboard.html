@@ -75,7 +75,7 @@
             <td>{{ r.prenom }} {{ r.nom }}</td>
             <td>{{ r.espace_nom }}</td>
             <td>{{ r.date_reservation }}</td>
-            <td>{{ r.duree === 'journee' ? 'Journee' : 'Demi-journee' }}</td>
+            <td>{{ getDureeLabel(r.duree) }}</td>
             <td><span class="badge" [class]="getStatutClass(r.statut)">{{ getStatutLabel(r.statut) }}</span></td>
           </tr>
         </tbody>

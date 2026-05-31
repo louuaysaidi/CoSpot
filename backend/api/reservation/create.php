@@ -11,6 +11,12 @@ if (empty($data['utilisateur_id']) || empty($data['espace_id']) || empty($data['
 }
 
 try {
+    $stmtDateFinColumn = $pdo->query("SHOW COLUMNS FROM reservations LIKE 'date_fin'");
+    if (!$stmtDateFinColumn->fetch()) {
+        $pdo->exec("ALTER TABLE reservations ADD COLUMN date_fin DATE NULL AFTER date_reservation");
+    }
+    $pdo->exec("ALTER TABLE reservations MODIFY duree VARCHAR(30) NOT NULL");
+
     $pdo->beginTransaction();
 
     $heureDebut = $data['heure_debut'];
@@ -22,7 +28,7 @@ try {
         exit();
     }
 
-    $stmtEspace = $pdo->prepare("SELECT id, type FROM espaces WHERE id = ?");
+    $stmtEspace = $pdo->prepare("SELECT id, nom, type FROM espaces WHERE id = ?");
     $stmtEspace->execute([$data['espace_id']]);
     $espace = $stmtEspace->fetch(PDO::FETCH_ASSOC);
 
@@ -32,19 +38,66 @@ try {
         exit();
     }
 
-    if ($espace['type'] !== 'open_space') {
+    $dateDebut = $data['date_reservation'];
+    $dateFin = $data['date_fin'] ?? $dateDebut;
+    $duree = $data['duree'];
+
+    $dureesAutorisees = [
+        'open_space' => ['journee', 'demi_journee'],
+        'salle_reunion' => ['salle_1h', 'salle_2h', 'salle_3h', 'salle_4h'],
+        'bureau_prive' => ['bureau_1_semaine', 'bureau_2_semaines', 'bureau_1_mois']
+    ];
+
+    if (!in_array($duree, $dureesAutorisees[$espace['type']], true)) {
+        echo json_encode(["success" => false, "message" => "Duree invalide pour cet espace."]);
+        $pdo->rollBack();
+        exit();
+    }
+
+    if ($espace['type'] === 'salle_reunion') {
+        $salleDureesHeures = [
+            'salle_1h' => 1,
+            'salle_2h' => 2,
+            'salle_3h' => 3,
+            'salle_4h' => 4
+        ];
+        $expectedFin = date('H:i', strtotime($heureDebut . ' +' . $salleDureesHeures[$duree] . ' hour'));
+        if ($heureFin !== $expectedFin || $heureDebut < '08:00' || $heureFin > '18:00') {
+            echo json_encode(["success" => false, "message" => "Horaire invalide pour une salle de reunion."]);
+            $pdo->rollBack();
+            exit();
+        }
+        $dateFin = $dateDebut;
+    }
+
+    if ($espace['type'] === 'bureau_prive') {
+        $start = new DateTime($dateDebut);
+        $expectedEnd = clone $start;
+        if ($duree === 'bureau_1_semaine') $expectedEnd->modify('+6 days');
+        if ($duree === 'bureau_2_semaines') $expectedEnd->modify('+13 days');
+        if ($duree === 'bureau_1_mois') $expectedEnd->modify('+1 month -1 day');
+        $dateFin = $expectedEnd->format('Y-m-d');
+        $heureDebut = '00:00';
+        $heureFin = '23:59';
+    }
+
+    if ($espace['type'] === 'salle_reunion') {
         $stmtUserConflict = $pdo->prepare("
             SELECT COUNT(*)
-            FROM reservations
-            WHERE utilisateur_id = ?
-              AND date_reservation = ?
-              AND heure_debut < ?
-              AND heure_fin > ?
-              AND statut = 'active'
+            FROM reservations r
+            JOIN espaces e ON e.id = r.espace_id
+            WHERE r.utilisateur_id = ?
+              AND r.date_reservation <= ?
+              AND COALESCE(r.date_fin, r.date_reservation) >= ?
+              AND r.heure_debut < ?
+              AND r.heure_fin > ?
+              AND r.statut = 'active'
+              AND e.type <> 'bureau_prive'
         ");
         $stmtUserConflict->execute([
             $data['utilisateur_id'],
-            $data['date_reservation'],
+            $dateFin,
+            $dateDebut,
             $heureFin,
             $heureDebut
         ]);
@@ -54,19 +107,51 @@ try {
             $pdo->rollBack();
             exit();
         }
+    }
 
+    if ($espace['type'] === 'bureau_prive') {
+        $stmtBureauUserConflict = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM reservations r
+            JOIN espaces e ON e.id = r.espace_id
+            WHERE r.utilisateur_id = ?
+              AND e.type = 'bureau_prive'
+              AND r.date_reservation <= ?
+              AND COALESCE(r.date_fin, r.date_reservation) >= ?
+              AND r.heure_debut < ?
+              AND r.heure_fin > ?
+              AND r.statut = 'active'
+        ");
+        $stmtBureauUserConflict->execute([
+            $data['utilisateur_id'],
+            $dateFin,
+            $dateDebut,
+            $heureFin,
+            $heureDebut
+        ]);
+
+        if ((int) $stmtBureauUserConflict->fetchColumn() > 0) {
+            echo json_encode(["success" => false, "message" => "Vous avez deja une reservation de bureau sur ce creneau horaire."]);
+            $pdo->rollBack();
+            exit();
+        }
+    }
+
+    if ($espace['type'] !== 'open_space') {
         $stmtEspaceConflict = $pdo->prepare("
             SELECT COUNT(*)
             FROM reservations
             WHERE espace_id = ?
-              AND date_reservation = ?
+              AND date_reservation <= ?
+              AND COALESCE(date_fin, date_reservation) >= ?
               AND heure_debut < ?
               AND heure_fin > ?
               AND statut = 'active'
         ");
         $stmtEspaceConflict->execute([
             $data['espace_id'],
-            $data['date_reservation'],
+            $dateFin,
+            $dateDebut,
             $heureFin,
             $heureDebut
         ]);
@@ -112,12 +197,15 @@ try {
             SELECT COUNT(*)
             FROM reservations r
             LEFT JOIN reservation_postes rp ON rp.reservation_id = r.id
+            JOIN espaces e ON e.id = r.espace_id
             WHERE r.utilisateur_id = ?
-              AND r.date_reservation = ?
+              AND r.date_reservation <= ?
+              AND COALESCE(r.date_fin, r.date_reservation) >= ?
               AND r.statut = 'active'
+              AND e.type <> 'bureau_prive'
               AND rp.id IS NULL
         ");
-        $stmtRoomConflict->execute([$data['utilisateur_id'], $data['date_reservation']]);
+        $stmtRoomConflict->execute([$data['utilisateur_id'], $dateDebut, $dateDebut]);
 
         if ((int) $stmtRoomConflict->fetchColumn() > 0) {
             echo json_encode(["success" => false, "message" => "Vous avez deja une reservation d'espace sur cette date."]);
@@ -134,7 +222,7 @@ try {
               AND r.date_reservation = ?
               AND r.statut = 'active'
         ");
-        $stmtUserTables->execute([$data['utilisateur_id'], $data['date_reservation']]);
+        $stmtUserTables->execute([$data['utilisateur_id'], $dateDebut]);
         $reservedTableIds = array_map('intval', $stmtUserTables->fetchAll(PDO::FETCH_COLUMN));
 
         if (!empty($reservedTableIds) && !in_array($selectedTableId, $reservedTableIds, true)) {
@@ -168,14 +256,15 @@ try {
 
     // Insert reservation
     $stmt = $pdo->prepare("
-        INSERT INTO reservations (utilisateur_id, espace_id, date_reservation, duree, heure_debut, heure_fin, statut)
-        VALUES (?, ?, ?, ?, ?, ?, 'active')
+        INSERT INTO reservations (utilisateur_id, espace_id, date_reservation, date_fin, duree, heure_debut, heure_fin, statut)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
     ");
     $stmt->execute([
         $data['utilisateur_id'],
         $data['espace_id'],
-        $data['date_reservation'],
-        $data['duree'],
+        $dateDebut,
+        $dateFin,
+        $duree,
         $heureDebut,
         $heureFin
     ]);

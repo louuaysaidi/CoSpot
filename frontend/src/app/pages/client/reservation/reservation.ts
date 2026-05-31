@@ -21,7 +21,11 @@ export class Reservation implements OnInit {
   // Step 2: date & duration
   dateReservation = '';
   creneau: 'journee' | 'matin' | 'apres_midi' = 'journee';
+  salleDuree: 'salle_1h' | 'salle_2h' | 'salle_3h' | 'salle_4h' = 'salle_1h';
+  salleHeureDebut = '08:00';
+  bureauDuree: 'bureau_1_semaine' | 'bureau_2_semaines' | 'bureau_1_mois' = 'bureau_1_semaine';
   minDate = '';
+  salleHeures = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
   // Step 3: pick postes
   tables: any[] = [];
@@ -88,6 +92,10 @@ export class Reservation implements OnInit {
     this.selectedEspace = espace;
     this.selectedPostes = [];
     this.selectedTableId = null;
+    this.creneau = 'journee';
+    this.salleDuree = 'salle_1h';
+    this.salleHeureDebut = '08:00';
+    this.bureauDuree = 'bureau_1_semaine';
     this.step = 2;
   }
 
@@ -175,6 +183,17 @@ export class Reservation implements OnInit {
   }
 
   getHeures(): { debut: string, fin: string } {
+    if (this.selectedEspace?.type === 'salle_reunion') {
+      return {
+        debut: this.salleHeureDebut,
+        fin: this.addHours(this.salleHeureDebut, this.getSalleDureeHours())
+      };
+    }
+
+    if (this.selectedEspace?.type === 'bureau_prive') {
+      return { debut: '00:00', fin: '23:59' };
+    }
+
     if (this.creneau === 'journee') {
       return { debut: '08:00', fin: '18:00' };
     }
@@ -184,14 +203,63 @@ export class Reservation implements OnInit {
     return { debut: '08:00', fin: '13:00' };
   }
 
-  getDuree(): 'journee' | 'demi_journee' {
+  getDuree(): string {
+    if (this.selectedEspace?.type === 'salle_reunion') return this.salleDuree;
+    if (this.selectedEspace?.type === 'bureau_prive') return this.bureauDuree;
     return this.creneau === 'journee' ? 'journee' : 'demi_journee';
   }
 
   getCreneauLabel(): string {
+    if (this.selectedEspace?.type === 'salle_reunion') {
+      const hours = this.getSalleDureeHours();
+      return `${hours} heure${hours > 1 ? 's' : ''} (${this.salleHeureDebut} - ${this.addHours(this.salleHeureDebut, hours)})`;
+    }
+
+    if (this.selectedEspace?.type === 'bureau_prive') {
+      if (this.bureauDuree === 'bureau_1_mois') return `1 mois, jusqu'au ${this.getDateFin()}`;
+      if (this.bureauDuree === 'bureau_2_semaines') return `2 semaines, jusqu'au ${this.getDateFin()}`;
+      return `1 semaine, jusqu'au ${this.getDateFin()}`;
+    }
+
     if (this.creneau === 'journee') return 'Journee complete';
     if (this.creneau === 'apres_midi') return 'Demi-journee apres-midi';
     return 'Demi-journee matin';
+  }
+
+  getSalleHeuresDisponibles(): string[] {
+    const maxStartHour = 18 - this.getSalleDureeHours();
+    return this.salleHeures.filter(h => Number(h.slice(0, 2)) <= maxStartHour);
+  }
+
+  syncSalleHeure() {
+    if (!this.getSalleHeuresDisponibles().includes(this.salleHeureDebut)) {
+      this.salleHeureDebut = this.getSalleHeuresDisponibles().at(-1) || '08:00';
+    }
+  }
+
+  getSalleDureeHours(): number {
+    switch (this.salleDuree) {
+      case 'salle_4h': return 4;
+      case 'salle_3h': return 3;
+      case 'salle_2h': return 2;
+      default: return 1;
+    }
+  }
+
+  getDateFin(): string {
+    const date = new Date(`${this.dateReservation}T00:00:00`);
+    if (this.bureauDuree === 'bureau_1_semaine') date.setDate(date.getDate() + 6);
+    if (this.bureauDuree === 'bureau_2_semaines') date.setDate(date.getDate() + 13);
+    if (this.bureauDuree === 'bureau_1_mois') {
+      date.setMonth(date.getMonth() + 1);
+      date.setDate(date.getDate() - 1);
+    }
+    return date.toISOString().split('T')[0];
+  }
+
+  private addHours(time: string, hours: number): string {
+    const [h, m] = time.split(':').map(Number);
+    return `${String(h + hours).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
   confirmer() {
@@ -209,6 +277,7 @@ export class Reservation implements OnInit {
       utilisateur_id: this.user.id,
       espace_id: this.selectedEspace.id,
       date_reservation: this.dateReservation,
+      date_fin: this.selectedEspace.type === 'bureau_prive' ? this.getDateFin() : this.dateReservation,
       duree: this.getDuree(),
       heure_debut: heures.debut,
       heure_fin: heures.fin

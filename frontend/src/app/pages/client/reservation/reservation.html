@@ -74,7 +74,7 @@
                [(ngModel)]="dateReservation" [min]="minDate">
       </div>
 
-      <div class="form-group">
+      <div class="form-group" *ngIf="selectedEspace.type === 'open_space'">
         <label>Durée</label>
         <div class="duree-options">
           <label class="duree-opt" [class.active]="creneau === 'journee'">
@@ -96,6 +96,76 @@
             <div class="duree-content">
               <div class="duree-title">Demi-journée après-midi</div>
               <div class="duree-time">13:00 - 18:00</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="selectedEspace.type === 'salle_reunion'">
+        <label>DurÃ©e</label>
+        <div class="duree-options">
+          <label class="duree-opt" [class.active]="salleDuree === 'salle_1h'">
+            <input type="radio" name="salleDuree" value="salle_1h" [(ngModel)]="salleDuree" (change)="syncSalleHeure()">
+            <div class="duree-content">
+              <div class="duree-title">1 heure</div>
+              <div class="duree-time">Reservation courte</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="salleDuree === 'salle_2h'">
+            <input type="radio" name="salleDuree" value="salle_2h" [(ngModel)]="salleDuree" (change)="syncSalleHeure()">
+            <div class="duree-content">
+              <div class="duree-title">2 heures</div>
+              <div class="duree-time">Session longue</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="salleDuree === 'salle_3h'">
+            <input type="radio" name="salleDuree" value="salle_3h" [(ngModel)]="salleDuree" (change)="syncSalleHeure()">
+            <div class="duree-content">
+              <div class="duree-title">3 heures</div>
+              <div class="duree-time">Session etendue</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="salleDuree === 'salle_4h'">
+            <input type="radio" name="salleDuree" value="salle_4h" [(ngModel)]="salleDuree" (change)="syncSalleHeure()">
+            <div class="duree-content">
+              <div class="duree-title">4 heures</div>
+              <div class="duree-time">Demi-journee</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="selectedEspace.type === 'salle_reunion'">
+        <label>Heure de debut</label>
+        <select class="form-control" [(ngModel)]="salleHeureDebut" name="salleHeureDebut">
+          <option *ngFor="let heure of getSalleHeuresDisponibles()" [value]="heure">
+            {{ heure }} - {{ getSalleDureeHours() }}h
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedEspace.type === 'bureau_prive'">
+        <label>DurÃ©e</label>
+        <div class="duree-options">
+          <label class="duree-opt" [class.active]="bureauDuree === 'bureau_1_semaine'">
+            <input type="radio" name="bureauDuree" value="bureau_1_semaine" [(ngModel)]="bureauDuree">
+            <div class="duree-content">
+              <div class="duree-title">1 semaine</div>
+              <div class="duree-time">7 jours</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="bureauDuree === 'bureau_2_semaines'">
+            <input type="radio" name="bureauDuree" value="bureau_2_semaines" [(ngModel)]="bureauDuree">
+            <div class="duree-content">
+              <div class="duree-title">2 semaines</div>
+              <div class="duree-time">14 jours</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="bureauDuree === 'bureau_1_mois'">
+            <input type="radio" name="bureauDuree" value="bureau_1_mois" [(ngModel)]="bureauDuree">
+            <div class="duree-content">
+              <div class="duree-title">1 mois</div>
+              <div class="duree-time">Jusqu'au {{ getDateFin() }}</div>
             </div>
           </label>
         </div>
