@@ -90,17 +90,17 @@ CREATE TABLE reservation_postes (
 -- Admin (password: admin123)
 INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Saidi', 'Louay', 'admin@cospot.com',
- '$2y$10$TKh8H1.PfunasXXrTB3vbO5V3vMj9wd6O8kqI7VkMqp4f6.Gw/oRW', 'admin');
+ '$2y$10$e1b6TU/trBDeIXRZtyB/h.aciibMu62qEAtt7uC9F1jvo0RFTmT..', 'admin');
 
 -- Client (password: client123)
 INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Toumi', 'Ahmed', 'ahmed@cospot.com',
- '$2y$10$TKh8H1.PfunasXXrTB3vbO5V3vMj9wd6O8kqI7VkMqp4f6.Gw/oRW', 'client');
+ '$2y$10$wF7wi4S.Zjgwe1Sk/ztZPeZ5TZUJxTx.JBC8WrXrb9AtNBddo7YRe', 'client');
 
 -- Client (password: client123)
 INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Klai', 'Youssef', 'youssef@cospot.com',
- '$2y$10$TKh8H1.PfunasXXrTB3vbO5V3vMj9wd6O8kqI7VkMqp4f6.Gw/oRW', 'client');
+ '$2y$10$wF7wi4S.Zjgwe1Sk/ztZPeZ5TZUJxTx.JBC8WrXrb9AtNBddo7YRe', 'client');
 
 -- Espaces
 INSERT INTO espaces (nom, type, capacite, description) VALUES

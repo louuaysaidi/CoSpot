@@ -1,1 +1,149 @@
-<p>utilisateurs works!</p>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">Co<em>Spot</em></div>
+    <div class="sb-admin-badge">Administrateur</div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <a routerLink="/admin/dashboard"    class="sb-item">📊 Tableau de bord</a>
+      <a routerLink="/admin/espaces"      class="sb-item">🏢 Gestion des espaces</a>
+      <a routerLink="/admin/reservations" class="sb-item">📅 Reservations</a>
+      <a routerLink="/admin/utilisateurs" class="sb-item active">👥 Utilisateurs</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <div class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title">Gestion des utilisateurs</h1>
+        <p class="admin-page-sub">{{ utilisateurs.length }} utilisateurs inscrits</p>
+      </div>
+      <button class="btn btn-primary" (click)="openAdd()">+ Ajouter utilisateur</button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="🔍 Rechercher par nom, prenom ou email..."
+        [(ngModel)]="searchTxt"/>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-msg">Chargement...</div>
+
+    <!-- TABLE -->
+    <div class="card" *ngIf="!loading">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom complet</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Statut</th>
+            <th>Inscrit le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filtered">
+            <td class="td-id">#{{ u.id }}</td>
+            <td>
+              <div class="user-info">
+                <div class="user-av">{{ u.nom.charAt(0) }}{{ u.prenom.charAt(0) }}</div>
+                <div>
+                  <div class="user-name">{{ u.prenom }} {{ u.nom }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--muted)">{{ u.email }}</td>
+            <td>
+              <span class="badge" [class]="u.role === 'admin' ? 'badge-purple' : 'badge-blue'">
+                {{ u.role }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [class]="u.statut === 'actif' ? 'badge-success' : 'badge-danger'">
+                {{ u.statut }}
+              </span>
+            </td>
+            <td style="color:var(--muted);font-size:12px">{{ u.date_inscription | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <div class="action-btns">
+                <button
+                  class="btn btn-sm"
+                  [class]="u.statut === 'actif' ? 'btn-warning' : 'btn-success'"
+                  (click)="toggleFreeze(u)">
+                  {{ u.statut === 'actif' ? '🔒 Geler' : '✅ Reactiver' }}
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteUser(u.id)">
+                  🗑️ Supprimer
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="7" class="empty-msg">Aucun utilisateur trouve.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MODAL AJOUT -->
+    <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()"></div>
+    <div class="modal" *ngIf="showForm">
+      <div class="modal-header">
+        <h3>Ajouter un utilisateur</h3>
+        <button class="modal-close" (click)="closeForm()">✕</button>
+      </div>
+
+      <div class="alert alert-error"   *ngIf="msg && msgType==='error'">{{ msg }}</div>
+      <div class="alert alert-success" *ngIf="msg && msgType==='success'">{{ msg }}</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" class="form-control" placeholder="Benali"
+            [(ngModel)]="form.nom" name="nom"/>
+        </div>
+        <div class="form-group">
+          <label>Prenom</label>
+          <input type="text" class="form-control" placeholder="Karim"
+            [(ngModel)]="form.prenom" name="prenom"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" placeholder="email@exemple.com"
+          [(ngModel)]="form.email" name="email"/>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" class="form-control" placeholder="••••••••"
+          [(ngModel)]="form.mot_de_passe" name="mot_de_passe"/>
+      </div>
+
+      <div class="form-group">
+        <label>Role</label>
+        <select class="form-control" [(ngModel)]="form.role" name="role">
+          <option value="client">Client</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeForm()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveUser()">Ajouter</button>
+      </div>
+    </div>
+
+  </main>
+</div>

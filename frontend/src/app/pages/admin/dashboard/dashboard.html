@@ -1,1 +1,103 @@
-<p>dashboard works!</p>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">Co<em>Spot</em></div>
+    <div class="sb-admin-badge">Administrateur</div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <a routerLink="/admin/dashboard"    class="sb-item active">📊 Tableau de bord</a>
+      <a routerLink="/admin/espaces"      class="sb-item">🏢 Gestion des espaces</a>
+      <a routerLink="/admin/reservations" class="sb-item">📅 Reservations</a>
+      <a routerLink="/admin/utilisateurs" class="sb-item">👥 Utilisateurs</a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="sb-user-av">{{ admin?.nom?.charAt(0) }}{{ admin?.prenom?.charAt(0) }}</div>
+      <div>
+        <div class="sb-user-name">{{ admin?.prenom }} {{ admin?.nom }}</div>
+        <div class="sb-user-role">Administrateur</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <div class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title">Tableau de bord</h1>
+        <p class="admin-page-sub">Bienvenue, {{ admin?.prenom }} !</p>
+      </div>
+      <a routerLink="/admin/espaces" class="btn btn-primary btn-sm">+ Ajouter un espace</a>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card" *ngFor="let s of stats" [class]="'kpi-' + s.color">
+        <div class="kpi-icon">{{ s.icon }}</div>
+        <div class="kpi-val">{{ s.value }}</div>
+        <div class="kpi-label">{{ s.label }}</div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS RECENTES -->
+    <div class="card" style="margin-top:24px">
+      <div class="card-header">
+        <h3 class="card-title">Reservations recentes</h3>
+        <a routerLink="/admin/reservations" class="card-action">Voir toutes</a>
+      </div>
+
+      <div *ngIf="loading" class="loading-msg">Chargement...</div>
+
+      <div *ngIf="!loading && reservations.length === 0" class="empty-msg">
+        Aucune reservation pour le moment.
+      </div>
+
+      <table class="admin-table" *ngIf="!loading && reservations.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Espace</th>
+            <th>Date</th>
+            <th>Duree</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reservations">
+            <td class="td-id">#{{ r.id }}</td>
+            <td>{{ r.prenom }} {{ r.nom }}</td>
+            <td>{{ r.espace_nom }}</td>
+            <td>{{ r.date_reservation }}</td>
+            <td>{{ r.duree === 'journee' ? 'Journee' : 'Demi-journee' }}</td>
+            <td><span class="badge" [class]="getStatutClass(r.statut)">{{ r.statut }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="quick-links">
+      <a routerLink="/admin/espaces" class="quick-card">
+        <div class="quick-icon">🏢</div>
+        <div class="quick-label">Gerer les espaces</div>
+        <div class="quick-sub">Ajouter, modifier, supprimer</div>
+      </a>
+      <a routerLink="/admin/reservations" class="quick-card">
+        <div class="quick-icon">📅</div>
+        <div class="quick-label">Superviser reservations</div>
+        <div class="quick-sub">Vue temps reel</div>
+      </a>
+      <a routerLink="/admin/utilisateurs" class="quick-card">
+        <div class="quick-icon">👥</div>
+        <div class="quick-label">Gerer utilisateurs</div>
+        <div class="quick-sub">Geler, supprimer, ajouter</div>
+      </a>
+    </div>
+
+  </main>
+</div>

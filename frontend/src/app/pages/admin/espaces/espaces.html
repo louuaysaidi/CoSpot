@@ -1,1 +1,128 @@
-<p>espaces works!</p>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">Co<em>Spot</em></div>
+    <div class="sb-admin-badge">Administrateur</div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <a routerLink="/admin/dashboard"    class="sb-item">📊 Tableau de bord</a>
+      <a routerLink="/admin/espaces"      class="sb-item active">🏢 Gestion des espaces</a>
+      <a routerLink="/admin/reservations" class="sb-item">📅 Reservations</a>
+      <a routerLink="/admin/utilisateurs" class="sb-item">👥 Utilisateurs</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <div class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title">Gestion des espaces</h1>
+        <p class="admin-page-sub">Ajouter, modifier ou supprimer des espaces</p>
+      </div>
+      <button class="btn btn-primary" (click)="openAdd()">+ Ajouter un espace</button>
+    </div>
+
+    <!-- ERRORS -->
+    <div class="alert alert-error" *ngIf="msg && msgType === 'error' && !showForm" style="margin-bottom: 20px;">
+      {{ msg }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-msg">Chargement...</div>
+
+    <!-- TABLE -->
+    <div class="card" *ngIf="!loading">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Capacite</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of espaces">
+            <td class="td-id">#{{ e.id }}</td>
+            <td><strong>{{ e.nom }}</strong><br><small style="color:var(--muted)">{{ e.description }}</small></td>
+            <td><span class="badge" [class]="getTypeClass(e.type)">{{ getTypeLabel(e.type) }}</span></td>
+            <td>{{ e.capacite }} pers.</td>
+            <td>
+              <span class="badge" [class]="e.statut === 'actif' ? 'badge-success' : 'badge-gray'">
+                {{ e.statut }}
+              </span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn btn-outline btn-sm" (click)="openEdit(e)">✏️ Modifier</button>
+                <button class="btn btn-danger btn-sm"  (click)="deleteEspace(e.id)">🗑️ Supprimer</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="espaces.length === 0">
+            <td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Aucun espace.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MODAL FORM -->
+    <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()"></div>
+    <div class="modal" *ngIf="showForm">
+      <div class="modal-header">
+        <h3>{{ editMode ? 'Modifier espace' : 'Ajouter un espace' }}</h3>
+        <button class="modal-close" (click)="closeForm()">✕</button>
+      </div>
+
+      <div class="alert alert-error"   *ngIf="msg && msgType === 'error'">{{ msg }}</div>
+      <div class="alert alert-success" *ngIf="msg && msgType === 'success'">{{ msg }}</div>
+
+      <div class="form-group">
+        <label>Nom de l'espace</label>
+        <input type="text" class="form-control" placeholder="Zone A - Open Space"
+          [(ngModel)]="form.nom" name="nom"/>
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <select class="form-control" [(ngModel)]="form.type" name="type">
+          <option value="open_space">Open Space</option>
+          <option value="salle_reunion">Salle de reunion</option>
+          <option value="bureau_prive">Bureau prive</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Capacite (personnes)</label>
+        <input type="number" class="form-control" min="1"
+          [(ngModel)]="form.capacite" name="capacite"/>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-control" rows="3" placeholder="Description de l'espace..."
+          [(ngModel)]="form.description" name="description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Statut</label>
+        <select class="form-control" [(ngModel)]="form.statut" name="statut">
+          <option value="actif">Actif</option>
+          <option value="inactif">Inactif</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeForm()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveEspace()">
+          {{ editMode ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
