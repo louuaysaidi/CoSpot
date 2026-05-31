@@ -38,7 +38,7 @@
     <div class="kpi-grid">
       <div class="kpi-card" *ngFor="let s of stats" [class]="'kpi-' + s.color">
         <div class="kpi-icon">{{ s.icon }}</div>
-        <div class="kpi-val">{{ s.value }}</div>
+        <div class="kpi-val" [class.kpi-loading]="statsLoading">{{ s.value }}</div>
         <div class="kpi-label">{{ s.label }}</div>
       </div>
     </div>
@@ -74,7 +74,7 @@
             <td>{{ r.espace_nom }}</td>
             <td>{{ r.date_reservation }}</td>
             <td>{{ r.duree === 'journee' ? 'Journee' : 'Demi-journee' }}</td>
-            <td><span class="badge" [class]="getStatutClass(r.statut)">{{ r.statut }}</span></td>
+            <td><span class="badge" [class]="getStatutClass(r.statut)">{{ getStatutLabel(r.statut) }}</span></td>
           </tr>
         </tbody>
       </table>

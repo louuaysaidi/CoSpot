@@ -16,14 +16,15 @@ export class Dashboard implements OnInit {
   admin: any = {};
 
   stats = [
-    { label: 'Espaces actifs', value: '5', icon: '🏢', color: 'green' },
-    { label: 'Reservations aujourdhui', value: '0', icon: '📅', color: 'blue' },
-    { label: 'Utilisateurs inscrits', value: '2', icon: '👥', color: 'purple' },
-    { label: 'Taux occupation', value: '0%', icon: '📊', color: 'orange' },
+    { label: 'Espaces actifs',          value: '—', icon: '🏢', color: 'green' },
+    { label: 'Réservations aujourd\'hui', value: '—', icon: '📅', color: 'blue' },
+    { label: 'Utilisateurs inscrits',   value: '—', icon: '👥', color: 'purple' },
+    { label: 'Taux d\'occupation',       value: '—', icon: '📊', color: 'orange' },
   ];
 
   reservations: any[] = [];
-  loading = false;
+  loading       = false;
+  statsLoading  = true;
 
   private api = 'http://localhost/cospot/backend/api';
 
@@ -35,7 +36,28 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.admin = this.auth.getUser();
+    this.loadStats();
     this.loadReservations();
+  }
+
+  loadStats() {
+    this.statsLoading = true;
+    this.http.get(`${this.api}/reservation/stats.php`).subscribe({
+      next: (res: any) => {
+        this.statsLoading = false;
+        if (res.success) {
+          this.stats[0].value = String(res.espaces_actifs);
+          this.stats[1].value = String(res.reservations_today);
+          this.stats[2].value = String(res.utilisateurs);
+          this.stats[3].value = res.taux_occupation + '%';
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.statsLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   loadReservations() {
@@ -58,8 +80,14 @@ export class Dashboard implements OnInit {
   }
 
   getStatutClass(statut: string): string {
-    return statut === 'active' ? 'badge-success'
+    return statut === 'active'  ? 'badge-success'
       : statut === 'annulee' ? 'badge-danger'
-        : 'badge-gray';
+      : 'badge-gray';
+  }
+
+  getStatutLabel(statut: string): string {
+    return statut === 'active'  ? 'Active'
+      : statut === 'annulee' ? 'Annulée'
+      : 'Terminée';
   }
 }
