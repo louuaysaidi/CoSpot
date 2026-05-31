@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -27,7 +27,11 @@ export class Dashboard implements OnInit {
 
   private api = 'http://localhost/cospot/backend/api';
 
-  constructor(private auth: AuthService, private http: HttpClient) { }
+  constructor(
+    private auth: AuthService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.admin = this.auth.getUser();
@@ -36,12 +40,20 @@ export class Dashboard implements OnInit {
 
   loadReservations() {
     this.loading = true;
-    this.http.get(`${this.api}/reservations/all.php`).subscribe({
+    this.cdr.detectChanges();
+
+    this.http.get(`${this.api}/reservation/all.php`).subscribe({
       next: (res: any) => {
         this.loading = false;
-        if (res.success) this.reservations = res.data.slice(0, 5);
+        if (res.success) {
+          this.reservations = (res.data || []).slice(0, 5);
+        }
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

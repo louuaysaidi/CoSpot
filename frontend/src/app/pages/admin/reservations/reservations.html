@@ -1,1 +1,114 @@
-<p>reservations works!</p>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">Co<em>Spot</em></div>
+    <div class="sb-admin-badge">Administrateur</div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <a routerLink="/admin/dashboard"    class="sb-item">📊 Tableau de bord</a>
+      <a routerLink="/admin/espaces"      class="sb-item">🏢 Gestion des espaces</a>
+      <a routerLink="/admin/reservations" class="sb-item active">📅 Reservations</a>
+      <a routerLink="/admin/utilisateurs" class="sb-item">👥 Utilisateurs</a>
+    </nav>
+
+    <div class="sb-user">
+      <div class="sb-user-av">{{ admin?.nom?.charAt(0) }}{{ admin?.prenom?.charAt(0) }}</div>
+      <div>
+        <div class="sb-user-name">{{ admin?.prenom }} {{ admin?.nom }}</div>
+        <div class="sb-user-role">Administrateur</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <div class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title">Supervision des Reservations</h1>
+        <p class="admin-page-sub">Consultez, recherchez et gerez toutes les reservations des clients</p>
+      </div>
+    </div>
+
+    <!-- FILTERS AND SEARCH -->
+    <div class="filters-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" 
+               class="search-input" 
+               placeholder="Rechercher par client, email, espace..." 
+               [(ngModel)]="searchQuery"
+               (input)="applyFilter()">
+      </div>
+
+      <div class="status-filters">
+        <button class="status-btn" [class.active]="activeFilter === 'all'" (click)="filterBy('all')">
+          Toutes
+        </button>
+        <button class="status-btn btn-active" [class.active]="activeFilter === 'active'" (click)="filterBy('active')">
+          Actives
+        </button>
+        <button class="status-btn btn-annulee" [class.active]="activeFilter === 'annulee'" (click)="filterBy('annulee')">
+          Annulées
+        </button>
+        <button class="status-btn btn-terminee" [class.active]="activeFilter === 'terminee'" (click)="filterBy('terminee')">
+          Terminées
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="card">
+      <div *ngIf="loading" class="loading-msg">Chargement des reservations...</div>
+
+      <div *ngIf="!loading && filteredReservations.length === 0" class="empty-msg">
+        Aucune reservation correspondante trouvee.
+      </div>
+
+      <table class="admin-table" *ngIf="!loading && filteredReservations.length > 0">
+        <thead>
+          <tr>
+            <th># ID</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Espace</th>
+            <th>Date</th>
+            <th>Durée</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of filteredReservations">
+            <td class="td-id">#{{ r.id }}</td>
+            <td class="td-user">{{ r.prenom }} {{ r.nom }}</td>
+            <td class="td-email">{{ r.email }}</td>
+            <td class="td-space">{{ r.espace_nom }}</td>
+            <td class="td-date">{{ r.date_reservation }}</td>
+            <td>
+              <div class="td-duree">{{ getDureeLabel(r.duree) }}</div>
+              <div class="td-hours">{{ r.heure_debut }} - {{ r.heure_fin }}</div>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="getStatutClass(r.statut)">
+                {{ getStatutLabel(r.statut) }}
+              </span>
+            </td>
+            <td>
+              <button *ngIf="r.statut === 'active'" 
+                      class="btn-cancel" 
+                      [disabled]="cancellingId === r.id"
+                      (click)="cancelReservation(r.id)">
+                {{ cancellingId === r.id ? '...' : 'Annuler' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>

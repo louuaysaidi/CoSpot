@@ -1,1 +1,77 @@
-<p>dashboard works!</p>
+<div class="client-page">
+
+  <!-- HEADER -->
+  <div class="client-header">
+    <div>
+      <h1 class="client-title">{{ getGreeting() }}, {{ user?.prenom }} 👋</h1>
+      <p class="client-sub">Voici un apercu de vos reservations</p>
+    </div>
+    <a routerLink="/client/reservation" class="btn btn-primary btn-sm">+ Nouvelle reservation</a>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card stat-blue">
+      <div class="stat-icon">📅</div>
+      <div class="stat-val">{{ stats.total }}</div>
+      <div class="stat-label">Total reservations</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val">{{ stats.active }}</div>
+      <div class="stat-label">Reservations actives</div>
+    </div>
+    <div class="stat-card stat-red">
+      <div class="stat-icon">❌</div>
+      <div class="stat-val">{{ stats.annulees }}</div>
+      <div class="stat-label">Annulees</div>
+    </div>
+  </div>
+
+  <!-- RECENT RESERVATIONS -->
+  <div class="card" style="margin-top:24px">
+    <div class="card-header">
+      <h3 class="card-title">Reservations recentes</h3>
+      <a routerLink="/client/historique" class="card-action">Voir tout l'historique →</a>
+    </div>
+
+    <div *ngIf="loading" class="loading-msg">Chargement...</div>
+
+    <div *ngIf="!loading && reservations.length === 0" class="empty-state">
+      <div class="empty-icon">📅</div>
+      <div class="empty-title">Aucune reservation</div>
+      <div class="empty-desc">Vous n'avez pas encore effectue de reservation.</div>
+      <a routerLink="/client/reservation" class="btn btn-primary btn-sm" style="margin-top:12px">Reserver maintenant</a>
+    </div>
+
+    <div class="res-list" *ngIf="!loading && reservations.length > 0">
+      <div class="res-item" *ngFor="let r of reservations.slice(0, 5)">
+        <div class="res-icon">{{ getTypeIcon(r.espace_type) }}</div>
+        <div class="res-info">
+          <div class="res-name">{{ r.espace_nom }}</div>
+          <div class="res-meta">{{ getTypeLabel(r.espace_type) }} · {{ getDureeLabel(r.duree) }}</div>
+        </div>
+        <div class="res-date">
+          <div class="res-date-val">{{ r.date_reservation }}</div>
+          <div class="res-time">{{ r.heure_debut }} - {{ r.heure_fin }}</div>
+        </div>
+        <span class="badge" [ngClass]="getStatutClass(r.statut)">{{ getStatutLabel(r.statut) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="quick-grid">
+    <a routerLink="/client/reservation" class="quick-card">
+      <div class="quick-icon">🖥️</div>
+      <div class="quick-label">Reserver un poste</div>
+      <div class="quick-sub">Open space, salle ou bureau</div>
+    </a>
+    <a routerLink="/client/historique" class="quick-card">
+      <div class="quick-icon">📋</div>
+      <div class="quick-label">Mon historique</div>
+      <div class="quick-sub">Voir toutes mes reservations</div>
+    </a>
+  </div>
+
+</div>

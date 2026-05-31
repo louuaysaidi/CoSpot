@@ -1,1 +1,158 @@
-<p>reservation works!</p>
+<div class="client-page">
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <a routerLink="/client/dashboard">Dashboard</a>
+    <span class="sep">/</span>
+    <span>Nouvelle reservation</span>
+  </div>
+
+  <h1 class="page-title">Reserver un espace</h1>
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step-item" [class.active]="step >= 1" [class.done]="step > 1">
+      <div class="step-num">1</div>
+      <div class="step-text">Espace</div>
+    </div>
+    <div class="step-line" [class.active]="step > 1"></div>
+    <div class="step-item" [class.active]="step >= 2" [class.done]="step > 2">
+      <div class="step-num">2</div>
+      <div class="step-text">Date & durée</div>
+    </div>
+    <div class="step-line" [class.active]="step > 2"></div>
+    <div class="step-item" [class.active]="step >= 3">
+      <div class="step-num">3</div>
+      <div class="step-text">Postes</div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+
+  <!-- ====================== STEP 1: CHOOSE ESPACE ====================== -->
+  <div *ngIf="step === 1">
+    <p class="step-desc">Selectionnez l'espace que vous souhaitez reserver :</p>
+
+    <div *ngIf="loading" class="loading-msg">Chargement des espaces...</div>
+
+    <div class="espace-grid" *ngIf="!loading">
+      <div class="espace-card" *ngFor="let e of espaces"
+           [class.selected]="selectedEspace?.id === e.id"
+           (click)="selectEspace(e)">
+        <div class="espace-icon">{{ getTypeIcon(e.type) }}</div>
+        <div class="espace-body">
+          <div class="espace-type">{{ getTypeLabel(e.type) }}</div>
+          <div class="espace-name">{{ e.nom }}</div>
+          <div class="espace-desc">{{ e.description }}</div>
+          <div class="espace-foot">
+            <span class="espace-cap">{{ e.capacite }} pers.</span>
+            <span class="badge badge-success">Disponible</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== STEP 2: DATE & DURATION ====================== -->
+  <div *ngIf="step === 2" class="step-content">
+    <button class="btn-back" (click)="goBack()">← Retour</button>
+
+    <div class="chosen-espace">
+      <span class="chosen-icon">{{ getTypeIcon(selectedEspace.type) }}</span>
+      <div>
+        <div class="chosen-name">{{ selectedEspace.nom }}</div>
+        <div class="chosen-type">{{ getTypeLabel(selectedEspace.type) }}</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-group">
+        <label for="date">Date de reservation</label>
+        <input type="date" id="date" class="form-control"
+               [(ngModel)]="dateReservation" [min]="minDate">
+      </div>
+
+      <div class="form-group">
+        <label>Durée</label>
+        <div class="duree-options">
+          <label class="duree-opt" [class.active]="duree === 'journee'">
+            <input type="radio" name="duree" value="journee" [(ngModel)]="duree">
+            <div class="duree-content">
+              <div class="duree-title">Journée complète</div>
+              <div class="duree-time">08:00 - 18:00</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="duree === 'demi_journee'">
+            <input type="radio" name="duree" value="demi_journee" [(ngModel)]="duree">
+            <div class="duree-content">
+              <div class="duree-title">Demi-journée</div>
+              <div class="duree-time">08:00 - 13:00</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" (click)="goToStep3()" style="width:100%; margin-top:8px">
+        Continuer →
+      </button>
+    </div>
+  </div>
+
+  <!-- ====================== STEP 3: PICK POSTES ====================== -->
+  <div *ngIf="step === 3" class="step-content">
+    <button class="btn-back" (click)="goBack()">← Retour</button>
+
+    <div class="recap-bar">
+      <span>{{ selectedEspace.nom }}</span>
+      <span class="recap-sep">·</span>
+      <span>{{ dateReservation }}</span>
+      <span class="recap-sep">·</span>
+      <span>{{ duree === 'journee' ? 'Journée' : 'Demi-journée' }}</span>
+    </div>
+
+    <!-- For open_space: show interactive floor plan -->
+    <div *ngIf="selectedEspace.type === 'open_space'">
+      <p class="step-desc">Selectionnez vos postes (max {{ maxPostes }}) :</p>
+
+      <div *ngIf="loadingPostes" class="loading-msg">Chargement du plan...</div>
+
+      <div class="floor-plan" *ngIf="!loadingPostes">
+        <div class="table-group" *ngFor="let t of tables">
+          <div class="table-label">{{ t.nom }}</div>
+          <div class="postes-row">
+            <div class="poste"
+                 *ngFor="let p of t.postes"
+                 [class.available]="p.disponible"
+                 [class.taken]="!p.disponible"
+                 [class.selected]="isSelected(p.id)"
+                 (click)="togglePoste(p.id, p.disponible)">
+              <div class="poste-icon">💺</div>
+              <div class="poste-name">{{ p.nom }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-info" *ngIf="selectedPostes.length > 0">
+        {{ selectedPostes.length }} poste(s) selectionne(s)
+      </div>
+    </div>
+
+    <!-- For salle / bureau: no poste selection needed -->
+    <div *ngIf="selectedEspace.type !== 'open_space'" class="no-poste-msg">
+      <div class="no-poste-icon">{{ getTypeIcon(selectedEspace.type) }}</div>
+      <div class="no-poste-text">L'espace complet sera reserve pour vous.</div>
+      <div class="no-poste-cap">Capacite : {{ selectedEspace.capacite }} personnes</div>
+    </div>
+
+    <!-- CONFIRM -->
+    <button class="btn btn-primary confirm-btn"
+            [disabled]="loading"
+            (click)="confirmer()">
+      {{ loading ? 'Reservation en cours...' : 'Confirmer la reservation' }}
+    </button>
+  </div>
+
+</div>

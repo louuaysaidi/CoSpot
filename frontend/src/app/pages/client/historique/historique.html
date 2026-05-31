@@ -1,1 +1,75 @@
-<p>historique works!</p>
+<div class="client-page">
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <a routerLink="/client/dashboard">Dashboard</a>
+    <span class="sep">/</span>
+    <span>Mes reservations</span>
+  </div>
+
+  <div class="client-header">
+    <div>
+      <h1 class="page-title" style="margin-bottom:4px">Historique des reservations</h1>
+      <p class="client-sub">Retrouvez et gerez l'ensemble de vos reservations d'espaces</p>
+    </div>
+    <a routerLink="/client/reservation" class="btn btn-primary btn-sm">+ Nouvelle reservation</a>
+  </div>
+
+  <!-- FILTERS BAR -->
+  <div class="filter-bar">
+    <button class="filter-btn" [class.active]="activeFilter === 'all'" (click)="filterBy('all')">
+      Tout <span class="filter-count">{{ getCount('all') }}</span>
+    </button>
+    <button class="filter-btn" [class.active]="activeFilter === 'active'" (click)="filterBy('active')">
+      Actives <span class="filter-count count-active">{{ getCount('active') }}</span>
+    </button>
+    <button class="filter-btn" [class.active]="activeFilter === 'annulee'" (click)="filterBy('annulee')">
+      Annulees <span class="filter-count count-annulee">{{ getCount('annulee') }}</span>
+    </button>
+    <button class="filter-btn" [class.active]="activeFilter === 'terminee'" (click)="filterBy('terminee')">
+      Terminees <span class="filter-count count-terminee">{{ getCount('terminee') }}</span>
+    </button>
+  </div>
+
+  <!-- RESERVATIONS CARD -->
+  <div class="card" style="margin-top:20px">
+    <div *ngIf="loading" class="loading-msg">Chargement de votre historique...</div>
+
+    <div *ngIf="!loading && filteredReservations.length === 0" class="empty-state">
+      <div class="empty-icon">📂</div>
+      <div class="empty-title">Aucune reservation trouvee</div>
+      <div class="empty-desc">Il n'y a pas de reservation correspondant a ce filtre.</div>
+      <a routerLink="/client/reservation" *ngIf="activeFilter === 'all'" class="btn btn-primary btn-sm" style="margin-top:12px">Effectuer ma premiere reservation</a>
+    </div>
+
+    <div class="res-list" *ngIf="!loading && filteredReservations.length > 0">
+      <div class="res-item" *ngFor="let r of filteredReservations">
+        <div class="res-icon">{{ getTypeIcon(r.espace_type) }}</div>
+        
+        <div class="res-info">
+          <div class="res-name">{{ r.espace_nom }}</div>
+          <div class="res-meta">{{ getTypeLabel(r.espace_type) }} · {{ getDureeLabel(r.duree) }}</div>
+        </div>
+
+        <div class="res-date">
+          <div class="res-date-val">{{ r.date_reservation }}</div>
+          <div class="res-time">{{ r.heure_debut }} - {{ r.heure_fin }}</div>
+        </div>
+
+        <div class="res-action-zone">
+          <span class="badge" [ngClass]="getStatutClass(r.statut)" style="margin-right:12px">
+            {{ getStatutLabel(r.statut) }}
+          </span>
+
+          <button *ngIf="r.statut === 'active'" 
+                  class="btn-cancel" 
+                  [disabled]="cancellingId === r.id"
+                  (click)="cancelReservation(r.id)">
+            {{ cancellingId === r.id ? 'Annulation...' : 'Annuler' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
