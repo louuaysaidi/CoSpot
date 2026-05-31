@@ -119,15 +119,16 @@
       <div *ngIf="loadingPostes" class="loading-msg">Chargement du plan...</div>
 
       <div class="floor-plan" *ngIf="!loadingPostes">
-        <div class="table-group" *ngFor="let t of tables">
+        <div class="table-group" *ngFor="let t of tables" [class.locked]="isLockedTable(t.id)">
           <div class="table-label">{{ t.nom }}</div>
           <div class="postes-row">
             <div class="poste"
                  *ngFor="let p of t.postes"
-                 [class.available]="p.disponible"
+                 [class.available]="isPosteSelectable(p.id, t.id, p.disponible)"
                  [class.taken]="!p.disponible"
+                 [class.locked]="p.disponible && isLockedTable(t.id)"
                  [class.selected]="isSelected(p.id)"
-                 (click)="togglePoste(p.id, p.disponible)">
+                 (click)="togglePoste(p.id, t.id, p.disponible)">
               <div class="poste-icon">💺</div>
               <div class="poste-name">{{ p.nom }}</div>
             </div>
@@ -136,7 +137,7 @@
       </div>
 
       <div class="selection-info" *ngIf="selectedPostes.length > 0">
-        {{ selectedPostes.length }} poste(s) selectionne(s)
+        {{ selectedPostes.length }} poste(s) selectionne(s) dans la meme table
       </div>
     </div>
 

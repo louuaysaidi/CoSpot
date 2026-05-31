@@ -227,6 +227,10 @@
   padding: 16px;
 }
 
+.table-group.locked {
+  opacity: 0.55;
+}
+
 .table-label {
   font-size: 12px;
   font-weight: 600;
@@ -271,6 +275,16 @@
   border-color: #E5E5E5;
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.poste.locked {
+  background: #F5F5F5;
+  border-color: #E5E5E5;
+  cursor: not-allowed;
+}
+
+.poste.locked:hover {
+  transform: none;
 }
 
 .poste.selected {

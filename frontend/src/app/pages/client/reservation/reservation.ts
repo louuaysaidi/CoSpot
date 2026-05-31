@@ -26,6 +26,7 @@ export class Reservation implements OnInit {
   // Step 3: pick postes
   tables: any[] = [];
   selectedPostes: number[] = [];
+  selectedTableId: number | null = null;
   maxPostes = 4;
 
   // UI state
@@ -86,6 +87,7 @@ export class Reservation implements OnInit {
   selectEspace(espace: any) {
     this.selectedEspace = espace;
     this.selectedPostes = [];
+    this.selectedTableId = null;
     this.step = 2;
   }
 
@@ -96,6 +98,8 @@ export class Reservation implements OnInit {
     }
     this.errorMsg = '';
     this.step = 3;
+    this.selectedPostes = [];
+    this.selectedTableId = null;
     this.loadPostes();
   }
 
@@ -118,23 +122,41 @@ export class Reservation implements OnInit {
       });
   }
 
-  togglePoste(posteId: number, disponible: boolean) {
+  togglePoste(posteId: number, tableId: number, disponible: boolean) {
     if (!disponible) return;
+
+    if (this.selectedTableId !== null && this.selectedTableId !== tableId && !this.isSelected(posteId)) {
+      this.errorMsg = 'Vous pouvez selectionner des postes dans une seule table par reservation.';
+      return;
+    }
+
     const idx = this.selectedPostes.indexOf(posteId);
     if (idx > -1) {
       this.selectedPostes.splice(idx, 1);
+      if (this.selectedPostes.length === 0) {
+        this.selectedTableId = null;
+      }
     } else {
       if (this.selectedPostes.length >= this.maxPostes) {
         this.errorMsg = `Maximum ${this.maxPostes} postes par reservation.`;
         return;
       }
       this.errorMsg = '';
+      this.selectedTableId = tableId;
       this.selectedPostes.push(posteId);
     }
   }
 
   isSelected(posteId: number): boolean {
     return this.selectedPostes.includes(posteId);
+  }
+
+  isLockedTable(tableId: number): boolean {
+    return this.selectedTableId !== null && this.selectedTableId !== tableId;
+  }
+
+  isPosteSelectable(posteId: number, tableId: number, disponible: boolean): boolean {
+    return disponible && (!this.isLockedTable(tableId) || this.isSelected(posteId));
   }
 
   getHeures(): { debut: string, fin: string } {
