@@ -23,8 +23,15 @@
 
       <div class="form-group">
         <label>Email</label>
-        <input type="email" class="form-control" placeholder="votre@email.com" [(ngModel)]="email" name="email"
+        <input type="email" class="form-control" placeholder="votre@email.com" [(ngModel)]="email" (ngModelChange)="onEmailChange()" name="email"
           required />
+        <div *ngIf="emailChecking" class="text-warning" style="font-size: 0.85rem; margin-top: 0.25rem;">Vérification en cours...</div>
+        <div *ngIf="emailExists" class="text-danger" style="font-size: 0.85rem; margin-top: 0.25rem;">Cet email existe déjà</div>
+      </div>
+
+      <div class="form-group">
+        <label>Telephone</label>
+        <input type="tel" class="form-control" placeholder="+216 20 000 000" [(ngModel)]="telephone" name="telephone" required />
       </div>
 
       <div class="form-group">
@@ -39,8 +46,8 @@
           required />
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
-        {{ loading ? 'Creation...' : 'Creer mon compte' }}
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loading || emailExists || emailChecking">
+        {{ loading ? 'Creation...' : (emailExists ? 'Email existe déjà' : (emailChecking ? 'Vérification...' : 'Creer mon compte')) }}
       </button>
 
     </form>

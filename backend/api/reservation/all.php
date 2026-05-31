@@ -3,7 +3,7 @@ require_once '../../config/database.php';
 
 $stmt = $pdo->query("
     SELECT r.*, 
-           u.nom, u.prenom, u.email,
+           u.nom, u.prenom, u.email, u.telephone,
            e.nom as espace_nom
     FROM reservations r
     JOIN utilisateurs u ON r.utilisateur_id = u.id

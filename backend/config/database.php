@@ -32,8 +32,6 @@ try {
         ]
     );
 
-    error_log('[DB] Connected successfully to ' . $db_name . ' at ' . $host);
-
 } catch (PDOException $e) {
     error_log('[DB] Connection failed: ' . $e->getMessage());
 

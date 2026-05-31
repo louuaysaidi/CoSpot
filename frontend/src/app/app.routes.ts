@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { adminGuard } from './core/guards/admin-guard';
+import { Register } from './pages/auth/register/register';
 
 export const routes: Routes = [
   // Public
   { path: '', loadComponent: () => import('./pages/home/home').then(m => m.Home) },
   { path: 'login', loadComponent: () => import('./pages/auth/login/login').then(m => m.Login) },
-  { path: 'register', loadComponent: () => import('./pages/auth/register/register').then(m => m.Register) },
+  { path: 'register', component: Register },
 
   // Client (protege)
   {

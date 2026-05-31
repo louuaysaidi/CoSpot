@@ -195,7 +195,13 @@
 
       <div *ngIf="loadingPostes" class="loading-msg">Chargement du plan...</div>
 
-      <div class="floor-plan" *ngIf="!loadingPostes">
+      <div class="no-poste-msg" *ngIf="!loadingPostes && tables.length === 0">
+        <div class="no-poste-icon">{{ getTypeIcon(selectedEspace.type) }}</div>
+        <div class="no-poste-text">Aucun poste n'est configure pour cet espace.</div>
+        <div class="no-poste-cap">Ajoutez un nouvel open space depuis l'administration pour generer ses postes automatiquement.</div>
+      </div>
+
+      <div class="floor-plan" *ngIf="!loadingPostes && tables.length > 0">
         <div class="table-group" *ngFor="let t of tables" [class.locked]="isLockedTable(t.id)">
           <div class="table-label">{{ t.nom }}</div>
           <div class="postes-row">
@@ -227,7 +233,7 @@
 
     <!-- CONFIRM -->
     <button class="btn btn-primary confirm-btn"
-            [disabled]="loading"
+            [disabled]="loading || (selectedEspace.type === 'open_space' && selectedPostes.length === 0)"
             (click)="confirmer()">
       {{ loading ? 'Reservation en cours...' : 'Confirmer la reservation' }}
     </button>

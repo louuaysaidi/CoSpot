@@ -92,8 +92,8 @@ export class Espaces implements OnInit {
         if (res.success) {
           this.msg = res.message;
           this.msgType = 'success';
+          this.closeForm();
           this.loadEspaces();
-          setTimeout(() => this.closeForm(), 1200);
         } else {
           this.msg = res.message;
           this.msgType = 'error';

@@ -11,12 +11,6 @@ if (empty($data['utilisateur_id']) || empty($data['espace_id']) || empty($data['
 }
 
 try {
-    $stmtDateFinColumn = $pdo->query("SHOW COLUMNS FROM reservations LIKE 'date_fin'");
-    if (!$stmtDateFinColumn->fetch()) {
-        $pdo->exec("ALTER TABLE reservations ADD COLUMN date_fin DATE NULL AFTER date_reservation");
-    }
-    $pdo->exec("ALTER TABLE reservations MODIFY duree VARCHAR(30) NOT NULL");
-
     $pdo->beginTransaction();
 
     $heureDebut = $data['heure_debut'];

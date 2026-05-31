@@ -10,7 +10,7 @@ if (!$id) {
 // Main reservation info with espace details and user
 $stmt = $pdo->prepare("
     SELECT r.*,
-           u.nom, u.prenom, u.email,
+           u.nom, u.prenom, u.email, u.telephone,
            e.nom         AS espace_nom,
            e.type        AS espace_type,
            e.capacite    AS espace_capacite,

@@ -13,6 +13,7 @@ CREATE TABLE utilisateurs (
     nom         VARCHAR(100) NOT NULL,
     prenom      VARCHAR(100) NOT NULL,
     email       VARCHAR(150) NOT NULL UNIQUE,
+    telephone   VARCHAR(30) NULL,
     mot_de_passe VARCHAR(255) NOT NULL,
     role        ENUM('client','admin') DEFAULT 'client',
     statut      ENUM('actif','gele') DEFAULT 'actif',

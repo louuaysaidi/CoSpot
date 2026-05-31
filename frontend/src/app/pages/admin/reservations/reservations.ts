@@ -73,6 +73,7 @@ export class Reservations implements OnInit {
         (r.prenom && r.prenom.toLowerCase().includes(q)) ||
         (r.nom && r.nom.toLowerCase().includes(q)) ||
         (r.email && r.email.toLowerCase().includes(q)) ||
+        (r.telephone && r.telephone.toLowerCase().includes(q)) ||
         (r.espace_nom && r.espace_nom.toLowerCase().includes(q))
       );
     }

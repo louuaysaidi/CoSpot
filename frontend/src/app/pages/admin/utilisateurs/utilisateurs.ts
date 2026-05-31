@@ -22,7 +22,7 @@ export class Utilisateurs implements OnInit {
   searchTxt = '';
 
   form: any = {
-    nom: '', prenom: '', email: '',
+    nom: '', prenom: '', email: '', telephone: '',
     mot_de_passe: '', role: 'client'
   };
 
@@ -76,7 +76,8 @@ export class Utilisateurs implements OnInit {
     this.filteredUsers = this.utilisateurs.filter(u =>
       u.nom.toLowerCase().includes(s) ||
       u.prenom.toLowerCase().includes(s) ||
-      u.email.toLowerCase().includes(s)
+      u.email.toLowerCase().includes(s) ||
+      (u.telephone || '').toLowerCase().includes(s)
     );
   }
 
@@ -121,7 +122,7 @@ export class Utilisateurs implements OnInit {
   }
 
   openAdd() {
-    this.form = { nom: '', prenom: '', email: '', mot_de_passe: '', role: 'client' };
+    this.form = { nom: '', prenom: '', email: '', telephone: '', mot_de_passe: '', role: 'client' };
     this.showForm = true;
     this.msg = '';
   }
@@ -129,8 +130,9 @@ export class Utilisateurs implements OnInit {
   closeForm() { this.showForm = false; this.msg = ''; }
 
   saveUser() {
-    if (!this.form.nom || !this.form.prenom || !this.form.email || !this.form.mot_de_passe) {
-      this.msg = 'Veuillez remplir tous les champs.';
+    if (!this.form.nom || !this.form.prenom || !this.form.email || !this.form.mot_de_passe
+        || (this.form.role === 'client' && !this.form.telephone)) {
+      this.msg = 'Veuillez remplir tous les champs pour un client, telephone inclus.';
       this.msgType = 'error';
       return;
     }

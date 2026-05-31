@@ -14,6 +14,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register.php`, data);
   }
 
+  checkEmail(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/check-email.php`, { email });
+  }
+
   login(email: string, mot_de_passe: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login.php`, { email, mot_de_passe }).pipe(
       tap((res: any) => {

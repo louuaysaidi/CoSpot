@@ -11,6 +11,15 @@ if (!$espaceId || !$date) {
     exit();
 }
 
+$stmtEspace = $pdo->prepare("SELECT id, type, capacite FROM espaces WHERE id = ?");
+$stmtEspace->execute([$espaceId]);
+$espace = $stmtEspace->fetch(PDO::FETCH_ASSOC);
+
+if (!$espace) {
+    echo json_encode(["success" => false, "message" => "Espace introuvable."]);
+    exit();
+}
+
 // Get tables for this espace
 $stmtTables = $pdo->prepare("
     SELECT t.*, e.nom as espace_nom
@@ -21,6 +30,38 @@ $stmtTables = $pdo->prepare("
 ");
 $stmtTables->execute([$espaceId]);
 $tables = $stmtTables->fetchAll(PDO::FETCH_ASSOC);
+
+if ($espace['type'] === 'open_space' && empty($tables)) {
+    $stmtTable = $pdo->prepare("INSERT INTO tables_espace (espace_id, nom, capacite, pos_x, pos_y) VALUES (?, ?, ?, ?, ?)");
+    $stmtPoste = $pdo->prepare("INSERT INTO postes (table_id, nom) VALUES (?, ?)");
+
+    $remaining = max(1, (int) $espace['capacite']);
+    $tableIndex = 1;
+    while ($remaining > 0) {
+        $tableCapacite = min(4, $remaining);
+        $posX = 40 + (($tableIndex - 1) % 3) * 130;
+        $posY = 60 + floor(($tableIndex - 1) / 3) * 160;
+
+        $stmtTable->execute([
+            $espaceId,
+            'T-' . str_pad((string) $tableIndex, 2, '0', STR_PAD_LEFT),
+            $tableCapacite,
+            $posX,
+            $posY
+        ]);
+
+        $tableId = (int) $pdo->lastInsertId();
+        for ($posteIndex = 1; $posteIndex <= $tableCapacite; $posteIndex++) {
+            $stmtPoste->execute([$tableId, 'S' . $posteIndex]);
+        }
+
+        $remaining -= $tableCapacite;
+        $tableIndex++;
+    }
+
+    $stmtTables->execute([$espaceId]);
+    $tables = $stmtTables->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Get all postes for these tables
 $tableIds = array_column($tables, 'id');
