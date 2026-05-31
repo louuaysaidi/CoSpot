@@ -6,7 +6,7 @@ import { Observable, tap } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private apiUrl = 'http://localhost/cospot/backend/api/auth';
+  private apiUrl = 'http://localhost/CoSpot/backend/api/auth';
 
   constructor(private http: HttpClient, private router: Router) {}
 

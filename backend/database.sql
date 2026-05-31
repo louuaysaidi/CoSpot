@@ -8,7 +8,7 @@ USE cospot_db;
 -- =============================================
 -- TABLE: utilisateurs
 -- =============================================
-CREATE TABLE utilisateurs (
+CREATE TABLE IF NOT EXISTS utilisateurs (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     nom         VARCHAR(100) NOT NULL,
     prenom      VARCHAR(100) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE utilisateurs (
 -- =============================================
 -- TABLE: espaces
 -- =============================================
-CREATE TABLE espaces (
+CREATE TABLE IF NOT EXISTS espaces (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     nom         VARCHAR(100) NOT NULL,
     type        ENUM('open_space','salle_reunion','bureau_prive') NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE espaces (
 -- =============================================
 -- TABLE: tables_espace (pour open space)
 -- =============================================
-CREATE TABLE tables_espace (
+CREATE TABLE IF NOT EXISTS tables_espace (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     espace_id   INT NOT NULL,
     nom         VARCHAR(50) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE tables_espace (
 -- =============================================
 -- TABLE: postes (sieges sur chaque table)
 -- =============================================
-CREATE TABLE postes (
+CREATE TABLE IF NOT EXISTS postes (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     table_id    INT NOT NULL,
     nom         VARCHAR(20) NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE postes (
 -- =============================================
 -- TABLE: reservations
 -- =============================================
-CREATE TABLE reservations (
+CREATE TABLE IF NOT EXISTS reservations (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     utilisateur_id  INT NOT NULL,
     espace_id       INT NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE reservations (
 -- =============================================
 -- TABLE: reservation_postes
 -- =============================================
-CREATE TABLE reservation_postes (
+CREATE TABLE IF NOT EXISTS reservation_postes (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     reservation_id  INT NOT NULL,
     poste_id        INT NOT NULL,
@@ -90,22 +90,22 @@ CREATE TABLE reservation_postes (
 -- =============================================
 
 -- Admin (password: admin123)
-INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
+INSERT IGNORE INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Saidi', 'Louay', 'admin@cospot.com',
  '$2y$10$e1b6TU/trBDeIXRZtyB/h.aciibMu62qEAtt7uC9F1jvo0RFTmT..', 'admin');
 
 -- Client (password: client123)
-INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
+INSERT IGNORE INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Toumi', 'Ahmed', 'ahmed@cospot.com',
  '$2y$10$wF7wi4S.Zjgwe1Sk/ztZPeZ5TZUJxTx.JBC8WrXrb9AtNBddo7YRe', 'client');
 
 -- Client (password: client123)
-INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
+INSERT IGNORE INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES
 ('Klai', 'Youssef', 'youssef@cospot.com',
  '$2y$10$wF7wi4S.Zjgwe1Sk/ztZPeZ5TZUJxTx.JBC8WrXrb9AtNBddo7YRe', 'client');
 
 -- Espaces
-INSERT INTO espaces (nom, type, capacite, description) VALUES
+INSERT IGNORE INTO espaces (nom, type, capacite, description) VALUES
 ('Zone A - Open Space',  'open_space',    32, 'Espace ouvert avec 8 tables de 4 postes'),
 ('Salle Confluence',     'salle_reunion', 10, 'Salle equipee ecran + tableau blanc'),
 ('Salle Horizon',        'salle_reunion',  6, 'Petite salle de reunion'),
@@ -113,7 +113,7 @@ INSERT INTO espaces (nom, type, capacite, description) VALUES
 ('Bureau Prive C-02',    'bureau_prive',   4, 'Bureau ferme pour petite equipe');
 
 -- Tables dans Zone A (espace_id = 1)
-INSERT INTO tables_espace (espace_id, nom, capacite, pos_x, pos_y) VALUES
+INSERT IGNORE INTO tables_espace (espace_id, nom, capacite, pos_x, pos_y) VALUES
 (1, 'T-01', 4,  40,  60),
 (1, 'T-02', 4, 170,  60),
 (1, 'T-03', 4, 300,  60),
@@ -124,7 +124,7 @@ INSERT INTO tables_espace (espace_id, nom, capacite, pos_x, pos_y) VALUES
 (1, 'T-08', 4, 170, 380);
 
 -- Postes (4 par table, table_id 1 a 8)
-INSERT INTO postes (table_id, nom) VALUES
+INSERT IGNORE INTO postes (table_id, nom) VALUES
 (1,'S1'),(1,'S2'),(1,'S3'),(1,'S4'),
 (2,'S1'),(2,'S2'),(2,'S3'),(2,'S4'),
 (3,'S1'),(3,'S2'),(3,'S3'),(3,'S4'),

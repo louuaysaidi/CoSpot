@@ -38,10 +38,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => "Erreur connexion base de donnees. Verificatioin rapide : \n" .
-                     "1. Est-ce que MySQL est lancé?\n" .
-                     "2. Est-ce que la base 'cospot_db' existe?\n" .
-                     "3. Est-ce que l'utilisateur 'root' est correct?",
+        "message" => "Erreur de connexion à la base de données. Vérifications à faire: (1) MySQL est lancé? (2) La base 'cospot_db' existe? (3) L'utilisateur 'root' est correct?",
         "error" => $e->getMessage()
     ]);
     exit();
