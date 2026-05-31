@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -27,18 +27,36 @@ export class Utilisateurs implements OnInit {
 
   private api = 'http://localhost/cospot/backend/api/utilisateurs';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.loadUsers(); }
 
   loadUsers() {
     this.loading = true;
+    this.msg = '';
+    this.cdr.detectChanges();
+
     this.http.get(`${this.api}/index.php`).subscribe({
       next: (res: any) => {
         this.loading = false;
-        if (res.success) this.utilisateurs = res.data;
+        if (res.success) {
+          this.utilisateurs = res.data || [];
+        } else {
+          this.msg = res.message || 'Erreur lors du chargement des utilisateurs.';
+          this.msgType = 'error';
+        }
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; }
+      error: (err: any) => {
+        this.loading = false;
+        this.msg = 'Erreur HTTP: ' + (err.message || 'Erreur de connexion au serveur.');
+        this.msgType = 'error';
+        console.error(err);
+        this.cdr.detectChanges();
+      }
     });
   }
 

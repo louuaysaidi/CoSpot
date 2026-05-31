@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -27,28 +27,35 @@ export class Espaces implements OnInit {
 
   private api = 'http://localhost/cospot/backend/api/espaces';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.loadEspaces(); }
 
   loadEspaces() {
     this.loading = true;
     this.msg = '';
+    this.cdr.detectChanges();
+
     this.http.get(`${this.api}/index.php`).subscribe({
       next: (res: any) => {
         this.loading = false;
         if (res.success) {
-          this.espaces = res.data;
+          this.espaces = res.data || [];
         } else {
           this.msg = res.message || 'Erreur lors du chargement des espaces.';
           this.msgType = 'error';
         }
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.loading = false;
         this.msg = 'Erreur HTTP: ' + (err.message || 'Erreur de connexion au serveur.');
         this.msgType = 'error';
         console.error(err);
+        this.cdr.detectChanges();
       }
     });
   }

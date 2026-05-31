@@ -34,6 +34,11 @@
         [(ngModel)]="searchTxt"/>
     </div>
 
+    <!-- ERRORS -->
+    <div class="alert alert-error" *ngIf="msg && msgType === 'error' && !showForm" style="margin-bottom: 20px;">
+      {{ msg }}
+    </div>
+
     <!-- LOADING -->
     <div *ngIf="loading" class="loading-msg">Chargement...</div>
 
