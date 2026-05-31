@@ -1,1 +1,31 @@
-<p>navbar works!</p>
+<nav class="navbar">
+  <a routerLink="/" class="nav-logo">Co<em>Spot</em></a>
+
+  <div class="nav-links">
+    <a routerLink="/">Accueil</a>
+    <a routerLink="/client/reservation" *ngIf="auth.isLoggedIn() && !auth.isAdmin()">Reserver</a>
+    <a routerLink="/client/historique"  *ngIf="auth.isLoggedIn() && !auth.isAdmin()">Mes reservations</a>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-actions">
+    <!-- Non connecte -->
+    <ng-container *ngIf="!auth.isLoggedIn()">
+      <a routerLink="/login" class="btn btn-outline btn-sm">Se connecter</a>
+      <a routerLink="/register" class="btn btn-primary btn-sm">Creer un compte</a>
+    </ng-container>
+
+    <!-- Client connecte -->
+    <ng-container *ngIf="auth.isLoggedIn() && !auth.isAdmin()">
+      <a routerLink="/client/dashboard" class="btn btn-outline btn-sm">Dashboard</a>
+      <button class="btn btn-primary btn-sm" (click)="logout()">Deconnexion</button>
+    </ng-container>
+
+    <!-- Admin connecte -->
+    <ng-container *ngIf="auth.isAdmin()">
+      <a routerLink="/admin/dashboard" class="btn btn-outline btn-sm">Admin Panel</a>
+      <button class="btn btn-primary btn-sm" (click)="logout()">Deconnexion</button>
+    </ng-container>
+  </div>
+</nav>

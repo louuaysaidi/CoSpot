@@ -1,1 +1,71 @@
-<p>home works!</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-chip">
+    <span class="chip-dot"></span>
+    18 postes libres maintenant
+  </div>
+  <h1>Reservez votre espace<br>de travail <em>en un clic</em></h1>
+  <p class="hero-sub">
+    CoSpot digitalise la reservation de votre coworking.
+    Choisissez votre poste sur le plan interactif en quelques secondes.
+  </p>
+  <div class="hero-btns">
+    <a routerLink="/register" class="btn btn-hero-p">Reserver maintenant →</a>
+    <a routerLink="/login"    class="btn btn-hero-s">Se connecter</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat" *ngFor="let s of stats">
+    <div class="stat-num">{{ s.num }}</div>
+    <div class="stat-lbl">{{ s.label }}</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="eyebrow">Comment ca marche</div>
+  <div class="sec-title">Reserver en <em>3 etapes</em></div>
+  <div class="steps-grid">
+    <div class="step" *ngFor="let s of steps">
+      <div class="step-num">{{ s.num }}</div>
+      <h3>{{ s.title }}</h3>
+      <p>{{ s.desc }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- SPACES -->
+<section class="section" style="padding-top:0">
+  <div class="eyebrow">Nos espaces</div>
+  <div class="sec-title">Trouvez <em>l'espace ideal</em></div>
+  <div class="spaces-grid">
+    <div class="space-card" *ngFor="let s of spaces">
+      <div class="space-img" [class]="s.cls">{{ s.icon }}</div>
+      <div class="space-body">
+        <div class="space-type">{{ s.type }}</div>
+        <div class="space-name">{{ s.name }}</div>
+        <div class="space-desc">{{ s.desc }}</div>
+        <div class="space-foot">
+          <span class="space-cap">{{ s.cap }}</span>
+          <span class="badge badge-success">{{ s.badge }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div>
+      <div class="cta-label">Commencer maintenant</div>
+      <div class="cta-title">Pret a reserver<br>votre <em>espace ideal ?</em></div>
+    </div>
+    <div class="cta-right">
+      <a routerLink="/register" class="btn-white">Creer un compte gratuit</a>
+      <span class="cta-note">Aucune carte bancaire requise</span>
+    </div>
+  </div>
+</section>
