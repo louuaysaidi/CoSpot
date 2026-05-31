@@ -22,13 +22,16 @@ export class Reservations implements OnInit {
   activeFilter = 'all';
   cancellingId: number | null = null;
 
+  selectedReservation: any = null;
+  detailLoading = false;
+
   private api = 'http://localhost/cospot/backend/api';
 
   constructor(
     private auth: AuthService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.admin = this.auth.getUser();
@@ -61,7 +64,7 @@ export class Reservations implements OnInit {
     // Search query
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase().trim();
-      temp = temp.filter(r => 
+      temp = temp.filter(r =>
         (r.prenom && r.prenom.toLowerCase().includes(q)) ||
         (r.nom && r.nom.toLowerCase().includes(q)) ||
         (r.email && r.email.toLowerCase().includes(q)) ||
@@ -81,6 +84,27 @@ export class Reservations implements OnInit {
   filterBy(statut: string) {
     this.activeFilter = statut;
     this.applyFilter();
+  }
+
+  openDetail(id: number) {
+    this.detailLoading = true;
+    this.selectedReservation = {};
+    this.http.get(`${this.api}/reservation/detail.php?id=${id}`).subscribe({
+      next: (res: any) => {
+        this.detailLoading = false;
+        if (res.success) this.selectedReservation = res.data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.detailLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  closeDetail() {
+    this.selectedReservation = null;
+    this.cdr.detectChanges();
   }
 
   cancelReservation(id: number) {
@@ -108,16 +132,34 @@ export class Reservations implements OnInit {
   getStatutClass(statut: string): string {
     return statut === 'active' ? 'badge-success'
       : statut === 'annulee' ? 'badge-danger'
-      : 'badge-gray';
+        : 'badge-gray';
   }
 
   getStatutLabel(statut: string): string {
     return statut === 'active' ? 'Active'
       : statut === 'annulee' ? 'Annulée'
-      : 'Terminée';
+        : 'Terminée';
   }
 
   getDureeLabel(duree: string): string {
     return duree === 'journee' ? 'Journée' : 'Demi-journée';
+  }
+
+  getTypeIcon(type: string): string {
+    switch (type) {
+      case 'open_space': return '🖥️';
+      case 'salle_reunion': return '📋';
+      case 'bureau_prive': return '🔒';
+      default: return '🏢';
+    }
+  }
+
+  getTypeLabel(type: string): string {
+    switch (type) {
+      case 'open_space': return 'Open Space';
+      case 'salle_reunion': return 'Salle de réunion';
+      case 'bureau_prive': return 'Bureau privé';
+      default: return type;
+    }
   }
 }

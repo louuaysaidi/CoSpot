@@ -20,13 +20,32 @@ export class Historique implements OnInit {
   activeFilter = 'all';
   cancellingId: number | null = null;
 
+  selectedReservation: any = null;
+  detailLoading = false;
+
   private api = 'http://localhost/cospot/backend/api';
 
-  constructor(private auth: AuthService, private http: HttpClient) {}
+  constructor(private auth: AuthService, private http: HttpClient) { }
 
   ngOnInit() {
     this.user = this.auth.getUser();
     this.loadReservations();
+  }
+
+  openDetail(id: number) {
+    this.detailLoading = true;
+    this.selectedReservation = {};
+    this.http.get(`${this.api}/reservation/detail.php?id=${id}`).subscribe({
+      next: (res: any) => {
+        this.detailLoading = false;
+        if (res.success) this.selectedReservation = res.data;
+      },
+      error: () => { this.detailLoading = false; }
+    });
+  }
+
+  closeDetail() {
+    this.selectedReservation = null;
   }
 
   loadReservations() {
@@ -80,13 +99,13 @@ export class Historique implements OnInit {
   getStatutClass(statut: string): string {
     return statut === 'active' ? 'badge-success'
       : statut === 'annulee' ? 'badge-danger'
-      : 'badge-gray';
+        : 'badge-gray';
   }
 
   getStatutLabel(statut: string): string {
     return statut === 'active' ? 'Active'
       : statut === 'annulee' ? 'Annulée'
-      : 'Terminée';
+        : 'Terminée';
   }
 
   getDureeLabel(duree: string): string {

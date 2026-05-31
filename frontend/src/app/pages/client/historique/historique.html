@@ -39,13 +39,14 @@
       <div class="empty-icon">📂</div>
       <div class="empty-title">Aucune reservation trouvee</div>
       <div class="empty-desc">Il n'y a pas de reservation correspondant a ce filtre.</div>
-      <a routerLink="/client/reservation" *ngIf="activeFilter === 'all'" class="btn btn-primary btn-sm" style="margin-top:12px">Effectuer ma premiere reservation</a>
+      <a routerLink="/client/reservation" *ngIf="activeFilter === 'all'" class="btn btn-primary btn-sm"
+        style="margin-top:12px">Effectuer ma premiere reservation</a>
     </div>
 
     <div class="res-list" *ngIf="!loading && filteredReservations.length > 0">
-      <div class="res-item" *ngFor="let r of filteredReservations">
+      <div class="res-item clickable" *ngFor="let r of filteredReservations" (click)="openDetail(r.id)">
         <div class="res-icon">{{ getTypeIcon(r.espace_type) }}</div>
-        
+
         <div class="res-info">
           <div class="res-name">{{ r.espace_nom }}</div>
           <div class="res-meta">{{ getTypeLabel(r.espace_type) }} · {{ getDureeLabel(r.duree) }}</div>
@@ -56,20 +57,107 @@
           <div class="res-time">{{ r.heure_debut }} - {{ r.heure_fin }}</div>
         </div>
 
-        <div class="res-action-zone">
+        <div class="res-action-zone" (click)="$event.stopPropagation()">
           <span class="badge" [ngClass]="getStatutClass(r.statut)" style="margin-right:12px">
             {{ getStatutLabel(r.statut) }}
           </span>
 
-          <button *ngIf="r.statut === 'active'" 
-                  class="btn-cancel" 
-                  [disabled]="cancellingId === r.id"
-                  (click)="cancelReservation(r.id)">
+          <button *ngIf="r.statut === 'active'" class="btn-cancel" [disabled]="cancellingId === r.id"
+            (click)="cancelReservation(r.id)">
             {{ cancellingId === r.id ? 'Annulation...' : 'Annuler' }}
           </button>
         </div>
+
+        <span class="res-detail-hint">›</span>
       </div>
     </div>
   </div>
 
+</div>
+
+<!-- ============================================================ -->
+<!-- DETAIL MODAL -->
+<!-- ============================================================ -->
+<div class="modal-backdrop" *ngIf="selectedReservation !== null" (click)="closeDetail()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <!-- Loading -->
+    <div *ngIf="detailLoading" class="modal-loading">
+      <div class="modal-spinner"></div>
+      <span>Chargement des détails...</span>
+    </div>
+
+    <!-- Content -->
+    <ng-container *ngIf="!detailLoading && selectedReservation?.id">
+
+      <!-- Header -->
+      <div class="modal-head">
+        <div class="modal-head-left">
+          <div class="modal-espace-icon">{{ getTypeIcon(selectedReservation.espace_type) }}</div>
+          <div>
+            <div class="modal-title">{{ selectedReservation.espace_nom }}</div>
+            <div class="modal-subtitle">{{ getTypeLabel(selectedReservation.espace_type) }}</div>
+          </div>
+        </div>
+        <div class="modal-head-right">
+          <span class="badge" [ngClass]="getStatutClass(selectedReservation.statut)">
+            {{ getStatutLabel(selectedReservation.statut) }}
+          </span>
+          <button class="modal-close" (click)="closeDetail()">✕</button>
+        </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="modal-info-grid">
+        <div class="modal-info-card">
+          <div class="mic-label">📅 Date</div>
+          <div class="mic-value">{{ selectedReservation.date_reservation }}</div>
+        </div>
+        <div class="modal-info-card">
+          <div class="mic-label">⏰ Horaire</div>
+          <div class="mic-value">{{ selectedReservation.heure_debut }} – {{ selectedReservation.heure_fin }}</div>
+        </div>
+        <div class="modal-info-card">
+          <div class="mic-label">🕐 Durée</div>
+          <div class="mic-value">{{ getDureeLabel(selectedReservation.duree) }}</div>
+        </div>
+        <div class="modal-info-card">
+          <div class="mic-label">💺 Postes réservés</div>
+          <div class="mic-value">{{ selectedReservation.nb_postes }}</div>
+        </div>
+      </div>
+
+      <!-- Espace description -->
+      <div class="modal-desc" *ngIf="selectedReservation.espace_description">
+        <div class="modal-section-label">Description de l'espace</div>
+        <p>{{ selectedReservation.espace_description }}</p>
+      </div>
+
+      <!-- Postes par table -->
+      <div class="modal-postes" *ngIf="selectedReservation.tables?.length > 0">
+        <div class="modal-section-label">Postes réservés par table</div>
+        <div class="table-chips-group" *ngFor="let t of selectedReservation.tables">
+          <div class="table-chip-header">
+            <span class="table-chip-name">🪑 {{ t.nom }}</span>
+            <span class="table-chip-cap">{{ t.postes.length }} / {{ t.capacite }} postes</span>
+          </div>
+          <div class="poste-chips">
+            <span class="poste-chip" *ngFor="let p of t.postes">{{ p.nom }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No postes (salle / bureau) -->
+      <div class="modal-desc" *ngIf="selectedReservation.tables?.length === 0">
+        <div class="modal-section-label">Espace réservé</div>
+        <p>Réservation de la salle complète · Capacité : {{ selectedReservation.espace_capacite }} personnes</p>
+      </div>
+
+      <!-- Reservation ID -->
+      <div class="modal-footer">
+        Réservation <strong>#{{ selectedReservation.id }}</strong> · Créée le {{ selectedReservation.date_creation | date:'dd/MM/yyyy' }}
+      </div>
+
+    </ng-container>
+  </div>
 </div>

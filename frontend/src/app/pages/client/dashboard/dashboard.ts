@@ -23,6 +23,9 @@ export class Dashboard implements OnInit {
     annulees: 0
   };
 
+  selectedReservation: any = null;
+  detailLoading = false;
+
   private api = 'http://localhost/cospot/backend/api';
 
   constructor(private auth: AuthService, private http: HttpClient) {}
@@ -46,6 +49,22 @@ export class Dashboard implements OnInit {
       },
       error: () => { this.loading = false; }
     });
+  }
+
+  openDetail(id: number) {
+    this.detailLoading = true;
+    this.selectedReservation = {};
+    this.http.get(`${this.api}/reservation/detail.php?id=${id}`).subscribe({
+      next: (res: any) => {
+        this.detailLoading = false;
+        if (res.success) this.selectedReservation = res.data;
+      },
+      error: () => { this.detailLoading = false; }
+    });
+  }
+
+  closeDetail() {
+    this.selectedReservation = null;
   }
 
   getStatutClass(statut: string): string {
