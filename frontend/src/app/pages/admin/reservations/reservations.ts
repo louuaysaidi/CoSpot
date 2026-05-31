@@ -18,6 +18,7 @@ export class Reservations implements OnInit {
   reservations: any[] = [];
   filteredReservations: any[] = [];
   loading = false;
+  errorMsg = '';
   searchQuery = '';
   activeFilter = 'all';
   cancellingId: number | null = null;
@@ -40,6 +41,7 @@ export class Reservations implements OnInit {
 
   loadReservations() {
     this.loading = true;
+    this.errorMsg = '';
     this.cdr.detectChanges();
 
     this.http.get(`${this.api}/reservation/all.php`).subscribe({
@@ -48,11 +50,14 @@ export class Reservations implements OnInit {
         if (res.success) {
           this.reservations = res.data || [];
           this.applyFilter();
+        } else {
+          this.errorMsg = res.message || 'Erreur lors du chargement des reservations.';
         }
         this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.errorMsg = 'Erreur de connexion au serveur.';
         this.cdr.detectChanges();
       }
     });
@@ -78,7 +83,6 @@ export class Reservations implements OnInit {
     }
 
     this.filteredReservations = temp;
-    this.cdr.detectChanges();
   }
 
   filterBy(statut: string) {
@@ -89,6 +93,8 @@ export class Reservations implements OnInit {
   openDetail(id: number) {
     this.detailLoading = true;
     this.selectedReservation = {};
+    this.cdr.detectChanges();
+
     this.http.get(`${this.api}/reservation/detail.php?id=${id}`).subscribe({
       next: (res: any) => {
         this.detailLoading = false;
@@ -108,12 +114,19 @@ export class Reservations implements OnInit {
   }
 
   cancelReservation(id: number) {
+    const reservation = this.reservations.find(r => r.id === id);
+    if (!reservation) {
+      this.errorMsg = 'Reservation introuvable.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.cancellingId = id;
     this.cdr.detectChanges();
 
     this.http.post(`${this.api}/reservation/cancel.php`, {
       id: id,
-      utilisateur_id: this.reservations.find(r => r.id === id)?.utilisateur_id
+      utilisateur_id: reservation.utilisateur_id
     }).subscribe({
       next: (res: any) => {
         this.cancellingId = null;
@@ -124,9 +137,22 @@ export class Reservations implements OnInit {
       },
       error: () => {
         this.cancellingId = null;
+        this.errorMsg = 'Erreur serveur pendant l annulation.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  trackByReservationId(_: number, reservation: any): number {
+    return reservation.id;
+  }
+
+  trackByTableId(_: number, table: any): number {
+    return table.id;
+  }
+
+  trackByPosteId(_: number, poste: any): number {
+    return poste.id;
   }
 
   getStatutClass(statut: string): string {

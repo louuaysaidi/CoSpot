@@ -35,6 +35,8 @@
       <a routerLink="/client/historique" class="card-action">Voir tout l'historique →</a>
     </div>
 
+    <div *ngIf="errorMsg && !loading" class="alert alert-error">{{ errorMsg }}</div>
+
     <div *ngIf="loading" class="loading-msg">Chargement...</div>
 
     <div *ngIf="!loading && reservations.length === 0" class="empty-state">
@@ -44,8 +46,8 @@
       <a routerLink="/client/reservation" class="btn btn-primary btn-sm" style="margin-top:12px">Reserver maintenant</a>
     </div>
 
-    <div class="res-list" *ngIf="!loading && reservations.length > 0">
-      <div class="res-item clickable" *ngFor="let r of reservations.slice(0, 5)" (click)="openDetail(r.id)">
+    <div class="res-list" *ngIf="!loading && recentReservations.length > 0">
+      <div class="res-item clickable" *ngFor="let r of recentReservations; trackBy: trackByReservationId" (click)="openDetail(r.id)">
         <div class="res-icon">{{ getTypeIcon(r.espace_type) }}</div>
         <div class="res-info">
           <div class="res-name">{{ r.espace_nom }}</div>

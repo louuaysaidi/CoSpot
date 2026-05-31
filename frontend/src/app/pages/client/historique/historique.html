@@ -33,6 +33,8 @@
 
   <!-- RESERVATIONS CARD -->
   <div class="card" style="margin-top:20px">
+    <div *ngIf="errorMsg && !loading" class="alert alert-error">{{ errorMsg }}</div>
+
     <div *ngIf="loading" class="loading-msg">Chargement de votre historique...</div>
 
     <div *ngIf="!loading && filteredReservations.length === 0" class="empty-state">
@@ -44,7 +46,7 @@
     </div>
 
     <div class="res-list" *ngIf="!loading && filteredReservations.length > 0">
-      <div class="res-item clickable" *ngFor="let r of filteredReservations" (click)="openDetail(r.id)">
+      <div class="res-item clickable" *ngFor="let r of filteredReservations; trackBy: trackByReservationId" (click)="openDetail(r.id)">
         <div class="res-icon">{{ getTypeIcon(r.espace_type) }}</div>
 
         <div class="res-info">

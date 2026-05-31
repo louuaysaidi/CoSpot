@@ -62,6 +62,8 @@
 
     <!-- TABLE CARD -->
     <div class="card">
+      <div *ngIf="errorMsg && !loading" class="alert alert-error">{{ errorMsg }}</div>
+
       <div *ngIf="loading" class="loading-msg">Chargement des reservations...</div>
 
       <div *ngIf="!loading && filteredReservations.length === 0" class="empty-msg">
@@ -82,7 +84,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="clickable-row" *ngFor="let r of filteredReservations" (click)="openDetail(r.id)">
+          <tr class="clickable-row" *ngFor="let r of filteredReservations; trackBy: trackByReservationId" (click)="openDetail(r.id)">
             <td class="td-id">#{{ r.id }}</td>
             <td class="td-user">{{ r.prenom }} {{ r.nom }}</td>
             <td class="td-email">{{ r.email }}</td>
@@ -185,13 +187,13 @@
       <!-- Postes par table -->
       <div class="modal-postes" *ngIf="selectedReservation.tables?.length > 0">
         <div class="modal-section-label">Postes réservés par table</div>
-        <div class="table-chips-group" *ngFor="let t of selectedReservation.tables">
+        <div class="table-chips-group" *ngFor="let t of selectedReservation.tables; trackBy: trackByTableId">
           <div class="table-chip-header">
             <span class="table-chip-name">🪑 {{ t.nom }}</span>
             <span class="table-chip-cap">{{ t.postes.length }} / {{ t.capacite }} postes</span>
           </div>
           <div class="poste-chips">
-            <span class="poste-chip" *ngFor="let p of t.postes">{{ p.nom }}</span>
+            <span class="poste-chip" *ngFor="let p of t.postes; trackBy: trackByPosteId">{{ p.nom }}</span>
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
 export class Utilisateurs implements OnInit {
 
   utilisateurs: any[] = [];
+  filteredUsers: any[] = [];
   loading   = false;
   showForm  = false;
   msg       = '';
@@ -44,6 +45,7 @@ export class Utilisateurs implements OnInit {
         this.loading = false;
         if (res.success) {
           this.utilisateurs = res.data || [];
+          this.applyFilter();
         } else {
           this.msg = res.message || 'Erreur lors du chargement des utilisateurs.';
           this.msgType = 'error';
@@ -61,13 +63,25 @@ export class Utilisateurs implements OnInit {
   }
 
   get filtered() {
-    if (!this.searchTxt) return this.utilisateurs;
+    return this.filteredUsers;
+  }
+
+  applyFilter() {
+    if (!this.searchTxt) {
+      this.filteredUsers = this.utilisateurs;
+      return;
+    }
+
     const s = this.searchTxt.toLowerCase();
-    return this.utilisateurs.filter(u =>
+    this.filteredUsers = this.utilisateurs.filter(u =>
       u.nom.toLowerCase().includes(s) ||
       u.prenom.toLowerCase().includes(s) ||
       u.email.toLowerCase().includes(s)
     );
+  }
+
+  trackByUserId(_: number, user: any): number {
+    return user.id;
   }
 
   toggleFreeze(u: any) {
@@ -80,6 +94,13 @@ export class Utilisateurs implements OnInit {
         if (res.success) {
           u.statut = newStatut;
         }
+        this.applyFilter();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.msg = 'Erreur serveur.';
+        this.msgType = 'error';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -89,6 +110,12 @@ export class Utilisateurs implements OnInit {
     this.http.post(`${this.api}/delete.php`, { id }).subscribe({
       next: (res: any) => {
         if (res.success) this.loadUsers();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.msg = 'Erreur serveur.';
+        this.msgType = 'error';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -118,8 +145,13 @@ export class Utilisateurs implements OnInit {
           this.msg = res.message;
           this.msgType = 'error';
         }
+        this.cdr.detectChanges();
       },
-      error: () => { this.msg = 'Erreur serveur.'; this.msgType = 'error'; }
+      error: () => {
+        this.msg = 'Erreur serveur.';
+        this.msgType = 'error';
+        this.cdr.detectChanges();
+      }
     });
   }
 }

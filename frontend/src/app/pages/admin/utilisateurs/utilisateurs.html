@@ -31,7 +31,8 @@
         type="text"
         class="form-control"
         placeholder="🔍 Rechercher par nom, prenom ou email..."
-        [(ngModel)]="searchTxt"/>
+        [(ngModel)]="searchTxt"
+        (input)="applyFilter()"/>
     </div>
 
     <!-- ERRORS -->
@@ -57,7 +58,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let u of filtered">
+          <tr *ngFor="let u of filteredUsers; trackBy: trackByUserId">
             <td class="td-id">#{{ u.id }}</td>
             <td>
               <div class="user-info">
@@ -93,7 +94,7 @@
               </div>
             </td>
           </tr>
-          <tr *ngIf="filtered.length === 0">
+          <tr *ngIf="filteredUsers.length === 0">
             <td colspan="7" class="empty-msg">Aucun utilisateur trouve.</td>
           </tr>
         </tbody>

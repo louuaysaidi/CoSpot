@@ -25,6 +25,7 @@ export class Dashboard implements OnInit {
   reservations: any[] = [];
   loading       = false;
   statsLoading  = true;
+  errorMsg      = '';
 
   private api = 'http://localhost/cospot/backend/api';
 
@@ -42,6 +43,8 @@ export class Dashboard implements OnInit {
 
   loadStats() {
     this.statsLoading = true;
+    this.cdr.detectChanges();
+
     this.http.get(`${this.api}/reservation/stats.php`).subscribe({
       next: (res: any) => {
         this.statsLoading = false;
@@ -62,6 +65,7 @@ export class Dashboard implements OnInit {
 
   loadReservations() {
     this.loading = true;
+    this.errorMsg = '';
     this.cdr.detectChanges();
 
     this.http.get(`${this.api}/reservation/all.php`).subscribe({
@@ -69,14 +73,25 @@ export class Dashboard implements OnInit {
         this.loading = false;
         if (res.success) {
           this.reservations = (res.data || []).slice(0, 5);
+        } else {
+          this.errorMsg = res.message || 'Erreur lors du chargement des reservations.';
         }
         this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
+        this.errorMsg = 'Erreur de connexion au serveur.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  trackByStatLabel(_: number, stat: any): string {
+    return stat.label;
+  }
+
+  trackByReservationId(_: number, reservation: any): number {
+    return reservation.id;
   }
 
   getStatutClass(statut: string): string {

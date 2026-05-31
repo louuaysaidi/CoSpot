@@ -76,6 +76,10 @@ export class Espaces implements OnInit {
 
   closeForm() { this.showForm = false; this.msg = ''; }
 
+  trackByEspaceId(_: number, espace: any): number {
+    return espace.id;
+  }
+
   saveEspace() {
     if (!this.form.nom || !this.form.type || !this.form.capacite) {
       this.msg = 'Veuillez remplir tous les champs.';
@@ -94,8 +98,13 @@ export class Espaces implements OnInit {
           this.msg = res.message;
           this.msgType = 'error';
         }
+        this.cdr.detectChanges();
       },
-      error: () => { this.msg = 'Erreur serveur.'; this.msgType = 'error'; }
+      error: () => {
+        this.msg = 'Erreur serveur.';
+        this.msgType = 'error';
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -104,6 +113,12 @@ export class Espaces implements OnInit {
     this.http.post(`${this.api}/delete.php`, { id }).subscribe({
       next: (res: any) => {
         if (res.success) this.loadEspaces();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.msg = 'Erreur serveur.';
+        this.msgType = 'error';
+        this.cdr.detectChanges();
       }
     });
   }

@@ -100,7 +100,14 @@ export class Reservation implements OnInit {
     this.step = 3;
     this.selectedPostes = [];
     this.selectedTableId = null;
-    this.loadPostes();
+
+    if (this.selectedEspace.type === 'open_space') {
+      this.loadPostes();
+    } else {
+      this.tables = [];
+      this.loadingPostes = false;
+      this.cdr.detectChanges();
+    }
   }
 
   loadPostes() {
