@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-home',
@@ -9,7 +10,19 @@ import { CommonModule } from '@angular/common';
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
-export class Home {
+export class Home implements OnInit {
+
+  constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      if (this.auth.isAdmin()) {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.router.navigate(['/client/dashboard']);
+      }
+    }
+  }
   stats = [
     { num: '12+', label: 'Espaces disponibles' },
     { num: '340', label: 'Reservations ce mois' },

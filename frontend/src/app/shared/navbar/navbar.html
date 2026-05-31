@@ -2,7 +2,7 @@
   <a routerLink="/" class="nav-logo">Co<em>Spot</em></a>
 
   <div class="nav-links">
-    <a routerLink="/">Accueil</a>
+    <a routerLink="/" *ngIf="!auth.isLoggedIn()">Accueil</a>
     <a routerLink="/client/reservation" *ngIf="auth.isLoggedIn() && !auth.isAdmin()">Reserver</a>
     <a routerLink="/client/historique"  *ngIf="auth.isLoggedIn() && !auth.isAdmin()">Mes reservations</a>
   </div>
