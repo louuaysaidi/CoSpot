@@ -20,7 +20,7 @@ export class Reservation implements OnInit {
 
   // Step 2: date & duration
   dateReservation = '';
-  duree: 'journee' | 'demi_journee' = 'journee';
+  creneau: 'journee' | 'matin' | 'apres_midi' = 'journee';
   minDate = '';
 
   // Step 3: pick postes
@@ -113,7 +113,15 @@ export class Reservation implements OnInit {
   loadPostes() {
     this.loadingPostes = true;
     this.cdr.detectChanges();
-    this.http.get(`${this.api}/reservation/postes_dispo.php?espace_id=${this.selectedEspace.id}&date=${this.dateReservation}`)
+    const heures = this.getHeures();
+    const params = new URLSearchParams({
+      espace_id: String(this.selectedEspace.id),
+      date: this.dateReservation,
+      heure_debut: heures.debut,
+      heure_fin: heures.fin
+    });
+
+    this.http.get(`${this.api}/reservation/postes_dispo.php?${params.toString()}`)
       .subscribe({
         next: (res: any) => {
           this.loadingPostes = false;
@@ -167,10 +175,23 @@ export class Reservation implements OnInit {
   }
 
   getHeures(): { debut: string, fin: string } {
-    if (this.duree === 'journee') {
+    if (this.creneau === 'journee') {
       return { debut: '08:00', fin: '18:00' };
     }
+    if (this.creneau === 'apres_midi') {
+      return { debut: '13:00', fin: '18:00' };
+    }
     return { debut: '08:00', fin: '13:00' };
+  }
+
+  getDuree(): 'journee' | 'demi_journee' {
+    return this.creneau === 'journee' ? 'journee' : 'demi_journee';
+  }
+
+  getCreneauLabel(): string {
+    if (this.creneau === 'journee') return 'Journee complete';
+    if (this.creneau === 'apres_midi') return 'Demi-journee apres-midi';
+    return 'Demi-journee matin';
   }
 
   confirmer() {
@@ -188,7 +209,7 @@ export class Reservation implements OnInit {
       utilisateur_id: this.user.id,
       espace_id: this.selectedEspace.id,
       date_reservation: this.dateReservation,
-      duree: this.duree,
+      duree: this.getDuree(),
       heure_debut: heures.debut,
       heure_fin: heures.fin
     };

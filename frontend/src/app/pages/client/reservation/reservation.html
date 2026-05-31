@@ -77,18 +77,25 @@
       <div class="form-group">
         <label>Durée</label>
         <div class="duree-options">
-          <label class="duree-opt" [class.active]="duree === 'journee'">
-            <input type="radio" name="duree" value="journee" [(ngModel)]="duree">
+          <label class="duree-opt" [class.active]="creneau === 'journee'">
+            <input type="radio" name="creneau" value="journee" [(ngModel)]="creneau">
             <div class="duree-content">
               <div class="duree-title">Journée complète</div>
               <div class="duree-time">08:00 - 18:00</div>
             </div>
           </label>
-          <label class="duree-opt" [class.active]="duree === 'demi_journee'">
-            <input type="radio" name="duree" value="demi_journee" [(ngModel)]="duree">
+          <label class="duree-opt" [class.active]="creneau === 'matin'">
+            <input type="radio" name="creneau" value="matin" [(ngModel)]="creneau">
             <div class="duree-content">
-              <div class="duree-title">Demi-journée</div>
+              <div class="duree-title">Demi-journée matin</div>
               <div class="duree-time">08:00 - 13:00</div>
+            </div>
+          </label>
+          <label class="duree-opt" [class.active]="creneau === 'apres_midi'">
+            <input type="radio" name="creneau" value="apres_midi" [(ngModel)]="creneau">
+            <div class="duree-content">
+              <div class="duree-title">Demi-journée après-midi</div>
+              <div class="duree-time">13:00 - 18:00</div>
             </div>
           </label>
         </div>
@@ -109,7 +116,7 @@
       <span class="recap-sep">·</span>
       <span>{{ dateReservation }}</span>
       <span class="recap-sep">·</span>
-      <span>{{ duree === 'journee' ? 'Journée' : 'Demi-journée' }}</span>
+      <span>{{ getCreneauLabel() }}</span>
     </div>
 
     <!-- For open_space: show interactive floor plan -->

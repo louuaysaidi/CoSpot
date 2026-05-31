@@ -3,6 +3,8 @@ require_once '../../config/database.php';
 
 $espaceId = $_GET['espace_id'] ?? null;
 $date     = $_GET['date'] ?? null;
+$heureDebut = $_GET['heure_debut'] ?? '08:00';
+$heureFin   = $_GET['heure_fin'] ?? '18:00';
 
 if (!$espaceId || !$date) {
     echo json_encode(["success" => false, "message" => "espace_id et date sont requis."]);
@@ -38,9 +40,11 @@ $stmtReserved = $pdo->prepare("
     JOIN reservations r ON rp.reservation_id = r.id
     WHERE r.espace_id = ?
       AND r.date_reservation = ?
+      AND r.heure_debut < ?
+      AND r.heure_fin > ?
       AND r.statut = 'active'
 ");
-$stmtReserved->execute([$espaceId, $date]);
+$stmtReserved->execute([$espaceId, $date, $heureFin, $heureDebut]);
 $reservedIds = $stmtReserved->fetchAll(PDO::FETCH_COLUMN);
 
 // Build result: tables with postes and availability
